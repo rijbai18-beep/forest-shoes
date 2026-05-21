@@ -30,9 +30,13 @@ jobs:
         working-directory: mobile
         run: flutter pub get
 
-      - name: Build debug APK
+      - name: Build release APK (R8 + Dart obfuscation)
         working-directory: mobile
-        run: flutter build apk --debug --split-per-abi
+        run: |
+          flutter build apk --release \
+            --split-per-abi \
+            --obfuscate \
+            --split-debug-info=build/debug-symbols
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -40,7 +44,7 @@ jobs:
           appId: 1:645366167801:android:a4079823d275b2f3f5ca28
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
-          file: mobile/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+          file: mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           releaseNotes: |
             Commit: ${{ github.sha }}
             Branch: ${{ github.ref_name }}

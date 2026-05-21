@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../config/cache_config.dart';
 import '../../../config/theme.dart';
 import '../../../models/cart_item_model.dart';
 
@@ -34,6 +35,7 @@ class CartItemWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: CachedNetworkImage(
               imageUrl: item.imageUrl,
+              cacheManager: AppCacheManager(),
               width: 80,
               height: 80,
               fit: BoxFit.cover,

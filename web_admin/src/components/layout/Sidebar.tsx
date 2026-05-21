@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useBranding } from '@/contexts/BrandingContext'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, Package, Tag, ShoppingBag, Ticket, ImageIcon,
   CreditCard, Truck, Bell, BarChart3, Users, HeadphonesIcon,
-  FileText, LogOut, Zap, ChevronLeft,
+  FileText, LogOut, ChevronLeft, Settings,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -43,11 +44,18 @@ const GROUPS = [
       { name: 'Content',       href: '/content',       icon: FileText },
     ],
   },
+  {
+    label: null,
+    items: [
+      { name: 'Settings', href: '/settings', icon: Settings },
+    ],
+  },
 ]
 
 export default function Sidebar() {
   const pathname  = usePathname()
   const { logout, user } = useAuth()
+  const { logoUrl } = useBranding()
   const [collapsed, setCollapsed] = useState(false)
 
   const initials = (user?.displayName || user?.email || 'A')
@@ -66,9 +74,15 @@ export default function Sidebar() {
         'flex items-center gap-2.5 h-16 px-4 border-b border-gray-100 flex-shrink-0',
         collapsed && 'justify-center px-2'
       )}>
-        <div className="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-          <Zap size={15} className="text-white" fill="white" />
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoUrl ?? '/favicon.svg'}
+          alt="Forest Shoes"
+          width={32}
+          height={32}
+          className="flex-shrink-0 rounded-lg object-contain"
+          onError={(e) => { (e.target as HTMLImageElement).src = '/favicon.svg' }}
+        />
         {!collapsed && (
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-gray-900 leading-tight">Forest Shoes</p>

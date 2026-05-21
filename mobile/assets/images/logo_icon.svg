@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Forest Shoes — App Icon Mark, 512×512 -->
+
+  <!-- ── Background ──────────────────────────────────────────────── -->
+  <!-- Deep forest green rounded square -->
+  <rect width="512" height="512" rx="114" fill="#1B5E20"/>
+
+  <!-- Subtle inner vignette for depth -->
+  <rect width="512" height="512" rx="114"
+    fill="url(#vignette)" opacity="0.15"/>
+
+  <defs>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="white" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0D3B12" stop-opacity="1"/>
+    </radialGradient>
+    <!-- Clip for keeping sole inside the shoe -->
+    <clipPath id="shoeClip">
+      <path d="
+        M 108 310
+        C 106 280 106 248 118 220
+        C 130 192 154 176 180 176
+        C 198 176 216 184 224 198
+        L 236 218
+        C 264 210 294 205 328 204
+        C 362 203 394 207 420 220
+        C 435 227 440 244 437 260
+        L 433 284
+        C 430 300 416 310 402 310
+        Z
+      "/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Shoe upper (main body) ─────────────────────────────────── -->
+  <path d="
+    M 108 310
+    C 106 280 106 248 118 220
+    C 130 192 154 176 180 176
+    C 198 176 216 184 224 198
+    L 236 218
+    C 264 210 294 205 328 204
+    C 362 203 394 207 420 220
+    C 435 227 440 244 437 260
+    L 433 284
+    C 430 300 416 310 402 310
+    L 118 310
+    C 112 310 108 310 108 310
+    Z
+  " fill="white"/>
+
+  <!-- ── Sole ───────────────────────────────────────────────────── -->
+  <path d="
+    M 96 310
+    L 402 310
+    C 418 310 430 320 432 336
+    L 434 356
+    C 435 368 424 378 412 378
+    L 108 378
+    C 96 378 84 368 84 356
+    L 84 330
+    C 84 318 90 310 96 310
+    Z
+  " fill="#D4EDDA"/>
+
+  <!-- Sole mid-line (tread detail) -->
+  <line x1="90" y1="344" x2="428" y2="344"
+    stroke="#B8DCC2" stroke-width="2" opacity="0.6"/>
+
+  <!-- ── Heel counter (the back bumper of the shoe) ─────────────── -->
+  <path d="
+    M 116 228
+    C 110 208 105 182 112 160
+    C 119 138 136 128 154 130
+    C 172 132 180 148 178 170
+    L 174 212
+    C 155 215 134 221 116 228
+    Z
+  " fill="white"/>
+
+  <!-- ── Forest stripe (the brand signature element) ────────────── -->
+  <!-- A leaf-silhouette swoosh across the quarter panel -->
+  <path d="
+    M 238 218
+    C 284 204 348 204 400 224
+    C 410 228 411 244 401 248
+    C 348 264 284 264 238 272
+    C 228 274 220 268 220 258
+    C 220 248 228 222 238 218
+    Z
+  " fill="#4CAF50" opacity="0.92"/>
+
+  <!-- Inner lighter highlight on stripe -->
+  <path d="
+    M 255 210
+    C 300 198 360 200 406 218
+    C 406 218 380 214 340 216
+    C 300 218 262 224 248 230
+    C 240 224 244 213 255 210
+    Z
+  " fill="#81C784" opacity="0.5"/>
+
+  <!-- ── Heel tab & leaf sprout ─────────────────────────────────── -->
+  <!-- Heel tab extension above the collar -->
+  <path d="
+    M 144 178
+    C 140 165 138 150 142 138
+    C 146 126 155 120 165 122
+    C 175 124 178 134 176 146
+    L 173 170
+    C 164 172 154 175 144 178
+    Z
+  " fill="white"/>
+
+  <!-- Leaf blade (growing from heel tab) -->
+  <path d="
+    M 152 136
+    C 136 114 124 88 138 68
+    C 152 48 176 58 178 80
+    C 180 98 172 118 158 132
+    C 155 135 152 136 152 136
+    Z
+  " fill="#81C784"/>
+
+  <!-- Smaller secondary leaf (branching) -->
+  <path d="
+    M 148 116
+    C 130 108 120 92 130 80
+    C 140 68 156 76 154 92
+    C 153 102 151 110 148 116
+    Z
+  " fill="#A5D6A7" opacity="0.8"/>
+
+  <!-- Leaf midrib -->
+  <path d="M 152 136 C 158 110 162 84 162 70"
+    stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Leaf veins (small) -->
+  <path d="M 155 118 C 142 114 134 104 132 94"
+    stroke="#2E7D32" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <path d="M 158 100 C 148 96 142 88 142 80"
+    stroke="#2E7D32" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+
+  <!-- ── Lace eyelets ───────────────────────────────────────────── -->
+  <circle cx="272" cy="246" r="8" fill="#1B5E20" opacity="0.35"/>
+  <circle cx="304" cy="240" r="8" fill="#1B5E20" opacity="0.35"/>
+  <circle cx="336" cy="236" r="8" fill="#1B5E20" opacity="0.35"/>
+  <circle cx="368" cy="234" r="8" fill="#1B5E20" opacity="0.35"/>
+</svg>

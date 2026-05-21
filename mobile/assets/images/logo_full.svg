@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 160" fill="none">
+  <!-- Forest Shoes — Full Horizontal Logo, 680×160 -->
+
+  <!-- ── Icon Mark (160×160) ──────────────────────────────────── -->
+  <g>
+    <rect width="160" height="160" rx="36" fill="#1B5E20"/>
+
+    <!-- Shoe upper -->
+    <path d="
+      M 33 97 C 32 87 32 76 36 67 C 40 58 48 53 56 53
+      C 62 53 67 56 70 61 L 74 67
+      C 82 65 92 63 103 63 C 114 63 123 65 130 69
+      C 135 71 136 77 135 82 L 134 89
+      C 133 94 129 97 125 97 Z
+    " fill="white"/>
+
+    <!-- Sole -->
+    <path d="
+      M 29 97 L 125 97 C 131 97 135 101 135 107 L 135 113
+      C 135 118 131 121 126 121 L 32 121 C 27 121 23 118 23 113 L 23 103
+      C 23 100 26 97 29 97 Z
+    " fill="#D4EDDA"/>
+
+    <!-- Heel counter -->
+    <path d="
+      M 35 69 C 33 63 32 55 34 49 C 36 43 41 40 46 41
+      C 51 42 53 47 52 53 L 51 65 C 45 66 40 67 35 69 Z
+    " fill="white"/>
+
+    <!-- Stripe swoosh -->
+    <path d="
+      M 75 67 C 89 63 108 63 124 70 C 127 71 127 77 124 78
+      C 108 83 89 83 75 85 C 72 86 70 84 70 81
+      C 70 78 72 68 75 67 Z
+    " fill="#4CAF50" opacity="0.92"/>
+
+    <!-- Heel tab -->
+    <path d="
+      M 44 55 C 43 51 42 46 44 42 C 46 38 50 36 53 37
+      C 56 38 57 42 56 46 L 54 53 C 51 54 47 54 44 55 Z
+    " fill="white"/>
+
+    <!-- Leaf -->
+    <path d="
+      M 47 42 C 41 34 38 25 43 18 C 48 11 56 15 57 24
+      C 58 31 54 38 49 43 Z
+    " fill="#81C784"/>
+    <path d="M 48 42 C 50 32 52 22 52 17"
+      stroke="#2E7D32" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+    <!-- Lace dots -->
+    <circle cx="84"  cy="78" r="3" fill="#1B5E20" opacity="0.3"/>
+    <circle cx="94"  cy="76" r="3" fill="#1B5E20" opacity="0.3"/>
+    <circle cx="104" cy="75" r="3" fill="#1B5E20" opacity="0.3"/>
+    <circle cx="114" cy="74" r="3" fill="#1B5E20" opacity="0.3"/>
+  </g>
+
+  <!-- ── Wordmark ────────────────────────────────────────────────── -->
+  <g font-family="'Poppins', 'Inter', system-ui, sans-serif">
+    <!-- FOREST -->
+    <text x="184" y="88"
+      font-size="66" font-weight="800" letter-spacing="-2"
+      fill="#1B5E20">FOREST</text>
+
+    <!-- Divider line -->
+    <line x1="184" y1="100" x2="672" y2="100"
+      stroke="#E8E0CC" stroke-width="1.2"/>
+
+    <!-- SHOES + leaf separator -->
+    <!-- Small leaf mark before "SHOES" -->
+    <path d="M 184 125 C 179 116 178 106 184 100 C 190 94 197 98 196 106 C 195 113 191 121 184 125 Z"
+      fill="#4CAF50"/>
+    <path d="M 184 125 C 187 115 188 106 187 101"
+      stroke="#2E7D32" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+    <text x="204" y="140"
+      font-size="36" font-weight="300" letter-spacing="14"
+      fill="#2E7D32">SHOES</text>
+  </g>
+</svg>

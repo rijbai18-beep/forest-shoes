@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../config/cache_config.dart';
 import '../../config/theme.dart';
 import '../../models/product_model.dart';
 import '../../models/cart_item_model.dart';
@@ -196,6 +197,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         : p.images
                             .map((url) => CachedNetworkImage(
                                   imageUrl: url,
+                                  cacheManager: AppCacheManager(),
                                   fit: BoxFit.cover,
                                   width: double.infinity,
                                 ))

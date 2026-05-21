@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Favicon — simplified icon mark, 64×64 -->
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="14" fill="#1B5E20"/>
+
+  <!-- Shoe upper -->
+  <path d="
+    M 14 39
+    C 13 35 13 30 16 26
+    C 19 22 24 20 29 21
+    C 32 21 34 23 35 26
+    L 37 29
+    C 40 28 44 27 48 27
+    C 52 27 55 28 57 31
+    C 58 32 58 35 57 37
+    L 56 39
+    C 55 41 53 42 51 42
+    L 16 42
+    C 15 42 14 41 14 39
+    Z
+  " fill="white"/>
+
+  <!-- Sole -->
+  <path d="
+    M 14 42 L 51 42 C 54 42 56 44 56 46 L 56 48 C 56 50 54 51 51 51 L 14 51 C 11 51 9 50 9 47 L 9 45 C 9 43 11 42 14 42 Z
+  " fill="#E8F5E9"/>
+
+  <!-- Heel counter -->
+  <path d="
+    M 15 28
+    C 14 25 13 21 15 18
+    C 17 15 21 14 24 16
+    C 26 17 26 21 25 25
+    L 24 29
+    C 20 29 17 29 15 28
+    Z
+  " fill="white"/>
+
+  <!-- Forest stripe swoosh -->
+  <path d="
+    M 37 29
+    C 42 27 48 27 53 31
+    C 54 32 54 35 53 36
+    C 48 38 42 38 37 36
+    C 36 36 35 34 35 32
+    C 35 30 36 29 37 29
+    Z
+  " fill="#4CAF50" opacity="0.9"/>
+
+  <!-- Heel leaf -->
+  <path d="M 18 19 C 14 15 12 10 16 7 C 20 4 24 8 23 14 C 22 17 20 18 18 19 Z" fill="#81C784"/>
+</svg>

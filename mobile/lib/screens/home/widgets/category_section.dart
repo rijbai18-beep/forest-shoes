@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../config/cache_config.dart';
 import '../../../config/theme.dart';
 import '../../../models/product_model.dart';
 
@@ -113,6 +114,7 @@ class CategorySection extends StatelessWidget {
                         child: cat.imageUrl != null
                             ? CachedNetworkImage(
                                 imageUrl: cat.imageUrl!,
+                                cacheManager: AppCacheManager(),
                                 fit: BoxFit.cover,
                                 errorWidget: (_, __, ___) => _FallbackIcon(
                                   icon: _iconFor(cat.name),

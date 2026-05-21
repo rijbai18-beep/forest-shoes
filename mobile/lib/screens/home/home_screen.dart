@@ -10,6 +10,7 @@ import '../../widgets/common/loading_widget.dart';
 import 'widgets/banner_carousel.dart';
 import 'widgets/category_section.dart';
 import 'widgets/featured_products_section.dart';
+import '../../widgets/common/app_logo_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -73,15 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
               surfaceTintColor: Colors.transparent,
               title: Row(
                 children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.forest_rounded, color: Colors.white, size: 22),
-                  ),
+                  const AppLogoWidget(size: 38),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Leaf, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { useBranding } from '@/contexts/BrandingContext'
+import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 
 export default function LoginPage() {
   const { login } = useAuth()
+  const { logoUrl } = useBranding()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
@@ -33,8 +35,10 @@ export default function LoginPage() {
           style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #4CAF50 0%, transparent 50%), radial-gradient(circle at 80% 20%, #81C784 0%, transparent 40%)' }} />
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/15 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-              <Leaf size={20} className="text-white" />
+            <div className="w-10 h-10 bg-white/15 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl ?? '/favicon.svg'} alt="Forest Shoes" className="w-7 h-7 object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/favicon.svg' }} />
             </div>
             <span className="text-xl font-bold">Forest Shoes</span>
           </div>
@@ -58,9 +62,10 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3"
-              style={{ background: 'linear-gradient(135deg, #6c63ff, #5b52e0)' }}>
-              <Leaf size={24} className="text-white" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 overflow-hidden bg-brand-600">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl ?? '/favicon.svg'} alt="Forest Shoes" className="w-10 h-10 object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/favicon.svg' }} />
             </div>
             <p className="text-sm text-gray-500">Forest Shoes Admin</p>
           </div>

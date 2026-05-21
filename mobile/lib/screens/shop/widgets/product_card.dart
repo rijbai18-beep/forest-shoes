@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import '../../../config/cache_config.dart';
 import '../../../config/theme.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/auth_provider.dart';
@@ -62,6 +63,7 @@ class ProductCard extends StatelessWidget {
                     imageUrl: product.images.isNotEmpty
                         ? product.images.first
                         : '',
+                    cacheManager: AppCacheManager(),
                     height: 160,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -402,6 +404,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         borderRadius: BorderRadius.circular(14),
                         child: CachedNetworkImage(
                           imageUrl: p.images.isNotEmpty ? p.images.first : '',
+                          cacheManager: AppCacheManager(),
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,

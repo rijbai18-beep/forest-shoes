@@ -41,33 +41,53 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Order History')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _orders.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.shopping_bag_outlined,
-                          size: 64, color: AppColors.textHint),
-                      SizedBox(height: 16),
-                      Text('No orders yet',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600)),
-                      Text('Your orders will appear here',
-                          style: TextStyle(color: AppColors.textSecondary)),
-                    ],
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: _loadOrders,
+        child: _loading
+            ? LayoutBuilder(
+                builder: (_, c) => SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: c.maxHeight,
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadOrders,
-                  child: ListView.separated(
+                ),
+              )
+            : _orders.isEmpty
+                ? LayoutBuilder(
+                    builder: (_, c) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: c.maxHeight,
+                        child: const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.shopping_bag_outlined,
+                                  size: 64, color: AppColors.textHint),
+                              SizedBox(height: 16),
+                              Text('No orders yet',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600)),
+                              Text('Your orders will appear here',
+                                  style: TextStyle(
+                                      color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : ListView.separated(
                     padding: const EdgeInsets.all(16),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: _orders.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (_, i) => _OrderCard(order: _orders[i]),
                   ),
-                ),
+      ),
     );
   }
 }

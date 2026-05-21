@@ -148,62 +148,95 @@ class _ShopScreenState extends State<ShopScreen> {
 
           // Products grid/list
           Expanded(
-            child: products.isLoading && filtered.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : products.error != null && filtered.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.error_outline_rounded,
-                                  size: 48, color: AppColors.error),
-                              const SizedBox(height: 12),
-                              Text(products.error!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 13)),
-                              const SizedBox(height: 16),
-                              TextButton(
-                                onPressed: () => context
-                                    .read<ProductProvider>()
-                                    .loadProducts(refresh: true),
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
+            child: RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () async {
+                context.read<ProductProvider>().loadProducts(
+                  filter: context.read<ProductProvider>().currentFilter,
+                  refresh: true,
+                );
+              },
+              child: products.isLoading && filtered.isEmpty
+                  ? LayoutBuilder(
+                      builder: (_, c) => SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: c.maxHeight,
+                          child: const Center(child: CircularProgressIndicator()),
                         ),
-                      )
-                    : filtered.isEmpty
-                        ? const Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.search_off_rounded,
-                                    size: 64, color: AppColors.textHint),
-                                SizedBox(height: 16),
-                                Text('No products found',
-                                    style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 16)),
-                              ],
-                            ),
-                          )
-                        : _isGridView
-                            ? _ProductGrid(
-                                products: filtered,
-                                scrollCtrl: _scrollCtrl,
-                                isLoadingMore:
-                                    products.isLoading && filtered.isNotEmpty,
-                              )
-                            : _ProductList(
-                                products: filtered,
-                                scrollCtrl: _scrollCtrl,
-                                isLoadingMore:
-                                    products.isLoading && filtered.isNotEmpty,
+                      ),
+                    )
+                  : products.error != null && filtered.isEmpty
+                      ? LayoutBuilder(
+                          builder: (_, c) => SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: SizedBox(
+                              height: c.maxHeight,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.error_outline_rounded,
+                                          size: 48, color: AppColors.error),
+                                      const SizedBox(height: 12),
+                                      Text(products.error!,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              color: AppColors.textSecondary,
+                                              fontSize: 13)),
+                                      const SizedBox(height: 16),
+                                      TextButton(
+                                        onPressed: () => context
+                                            .read<ProductProvider>()
+                                            .loadProducts(refresh: true),
+                                        child: const Text('Retry'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
+                            ),
+                          ),
+                        )
+                      : filtered.isEmpty
+                          ? LayoutBuilder(
+                              builder: (_, c) => SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: SizedBox(
+                                  height: c.maxHeight,
+                                  child: const Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.search_off_rounded,
+                                            size: 64, color: AppColors.textHint),
+                                        SizedBox(height: 16),
+                                        Text('No products found',
+                                            style: TextStyle(
+                                                color: AppColors.textSecondary,
+                                                fontSize: 16)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : _isGridView
+                              ? _ProductGrid(
+                                  products: filtered,
+                                  scrollCtrl: _scrollCtrl,
+                                  isLoadingMore:
+                                      products.isLoading && filtered.isNotEmpty,
+                                )
+                              : _ProductList(
+                                  products: filtered,
+                                  scrollCtrl: _scrollCtrl,
+                                  isLoadingMore:
+                                      products.isLoading && filtered.isNotEmpty,
+                                ),
+            ),
           ),
         ],
       ),

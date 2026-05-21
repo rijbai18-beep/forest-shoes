@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../../../config/cache_config.dart';
 import '../../../config/theme.dart';
 import '../../../models/banner_model.dart';
 
@@ -40,6 +41,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
               clipBehavior: Clip.antiAlias,
               child: CachedNetworkImage(
                 imageUrl: banner.imageUrl,
+                cacheManager: AppCacheManager(),
                 fit: BoxFit.cover,
                 width: double.infinity,
                 placeholder: (_, __) => Container(
