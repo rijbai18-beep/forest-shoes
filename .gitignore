@@ -15,7 +15,6 @@ mobile/.flutter-plugins-dependencies
 mobile/android/.gradle/
 mobile/android/local.properties
 mobile/android/key.properties
-mobile/android/app/google-services.json
 mobile/android/captures/
 mobile/android/GeneratedPluginRegistrant.java
 *.jks

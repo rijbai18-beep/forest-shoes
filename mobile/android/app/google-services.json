@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "645366167801",
+    "project_id": "testproject1-489910",
+    "storage_bucket": "testproject1-489910.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645366167801:android:99957d48f6192ffef5ca28",
+        "android_client_info": {
+          "package_name": "com.forestshoes.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdEOBqFFeS9eyw_bTt6GIdwkjKtB7c3gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645366167801:android:a4079823d275b2f3f5ca28",
+        "android_client_info": {
+          "package_name": "com.forestshoes.forest_shoes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdEOBqFFeS9eyw_bTt6GIdwkjKtB7c3gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
