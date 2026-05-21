@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
+  static const primaryDark  = Color(0xFF0D3B12);
   static const primary     = Color(0xFF1B5E20);
   static const primaryMid  = Color(0xFF2E7D32);
   static const primaryLight= Color(0xFF4CAF50);
