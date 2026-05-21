@@ -1,0 +1,59 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+
+    function isValidImageStrict() {
+      return request.resource.contentType.matches('image/(png|jpeg|jpg|webp)') &&
+             request.resource.size < 5 * 1024 * 1024; // 5MB max
+    }
+
+    // Product images - admin only upload
+    match /products/{productId}/{imageFile} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage();
+    }
+
+    // Category images
+    match /categories/{categoryId}/{imageFile} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage();
+    }
+
+    // Banner images - PNG/JPEG only
+    match /banners/{bannerId}/{imageFile} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImageStrict();
+    }
+
+    // User profile images
+    match /users/{userId}/profile/{imageFile} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId && isValidImage();
+    }
+
+    // Order receipts (PDFs) - only the owning user or admin
+    match /receipts/{orderId}/{file} {
+      allow read: if isAuthenticated();
+      allow write: if false; // written by Cloud Functions only
+    }
+
+    // Support ticket attachments
+    match /support/{ticketId}/{file} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImage();
+    }
+  }
+}

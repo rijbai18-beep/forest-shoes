@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --brand: 108 99 255; }
+  body  { @apply bg-[#F4F6FA] text-gray-900 antialiased; font-family: 'Inter', sans-serif; }
+}
+
+@layer components {
+  /* ── Sidebar nav (white sidebar) ────────────────────────────────────────── */
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+           transition-all duration-150 relative cursor-pointer;
+  }
+  .nav-active { @apply bg-brand-50 text-brand-600; }
+  .nav-idle   { @apply text-gray-500 hover:text-gray-800 hover:bg-gray-100; }
+
+  /* ── Input ──────────────────────────────────────────────────────────────── */
+  .input-field {
+    @apply w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl
+           focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600
+           placeholder:text-gray-400 transition-all duration-150;
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────────────────────── */
+  .btn-primary   { @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl px-4 py-2.5 text-sm bg-brand-600 hover:bg-brand-700 text-white transition-all active:scale-95 shadow-sm; }
+  .btn-ghost     { @apply inline-flex items-center justify-center gap-2 font-medium rounded-lg px-3 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all; }
+  .btn-danger    { @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl px-4 py-2.5 text-sm bg-red-600 hover:bg-red-700 text-white transition-all active:scale-95; }
+  .btn-outline   { @apply inline-flex items-center justify-center gap-2 font-medium rounded-xl px-4 py-2.5 text-sm border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition-all; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 font-medium rounded-xl px-4 py-2.5 text-sm border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all; }
+
+  /* ── Badges ──────────────────────────────────────────────────────────────── */
+  .badge        { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1; }
+  .badge-green  { @apply badge bg-emerald-50  text-emerald-700 ring-emerald-200/60; }
+  .badge-yellow { @apply badge bg-amber-50    text-amber-700   ring-amber-200/60; }
+  .badge-red    { @apply badge bg-red-50      text-red-700     ring-red-200/60; }
+  .badge-blue   { @apply badge bg-blue-50     text-blue-700    ring-blue-200/60; }
+  .badge-purple { @apply badge bg-brand-50    text-brand-700   ring-brand-200/60; }
+  .badge-gray   { @apply badge bg-gray-100    text-gray-500    ring-gray-200/60; }
+  .badge-orange { @apply badge bg-orange-50   text-orange-700  ring-orange-200/60; }
+
+  /* ── Form ────────────────────────────────────────────────────────────────── */
+  .form-label       { @apply block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide; }
+  .form-section     { @apply bg-white rounded-2xl border border-gray-100 p-5 space-y-4 shadow-[0_1px_3px_0_rgb(0_0_0/0.05)]; }
+  .form-section-title { @apply flex items-center gap-2 text-sm font-semibold text-gray-700 pb-1 border-b border-gray-50; }
+
+  /* ── Cards & tables ──────────────────────────────────────────────────────── */
+  .card     { @apply bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_0_rgb(0_0_0/0.05)]; }
+  .table-th { @apply px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider; }
+  .table-td { @apply px-4 py-3 text-sm text-gray-700; }
+
+  /* ── Empty state ─────────────────────────────────────────────────────────── */
+  .empty-state { @apply flex flex-col items-center justify-center py-20 gap-3 text-gray-400; }
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-gray-200 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-gray-300; }
