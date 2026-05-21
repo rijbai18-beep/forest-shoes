@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { collection, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Order } from '@/types'
 import { formatCurrency, formatDateTime, ORDER_STATUSES, getStatusBadge } from '@/lib/utils'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import OrderDetail from './OrderDetail'
 import {
   Card, Title, Text, Flex, Badge, TextInput, Button, Color,
   TabGroup, TabList, Tab, TabPanels, TabPanel,
@@ -20,12 +22,15 @@ const TREMOR_STATUS: Record<string, Color> = {
 }
 
 export default function OrdersPage() {
+  const searchParams = useSearchParams()
+  const selectedId = searchParams.get('id')
+
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch]   = useState('')
   const [tabIdx, setTabIdx]   = useState(0)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { if (!selectedId) load() }, [selectedId])
   async function load() {
     const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')))
     setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() } as Order)))
@@ -44,6 +49,8 @@ export default function OrdersPage() {
     (o.id.includes(search) || o.address?.name?.toLowerCase().includes(search.toLowerCase())) &&
     (!statusFilter || o.status === statusFilter)
   )
+
+  if (selectedId) return <OrderDetail id={selectedId} />
 
   return (
     <main className="p-6 space-y-6">
@@ -114,7 +121,7 @@ export default function OrdersPage() {
                                   className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20">
                                   {ORDER_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                 </select>
-                                <Link href={"/orders/" + order.id}
+                                <Link href={"/orders?id=" + order.id}
                                   className="p-1.5 text-gray-400 hover:text-brand-600 rounded-lg hover:bg-green-50 transition-colors">
                                   <ChevronRightIcon className="w-4 h-4" />
                                 </Link>

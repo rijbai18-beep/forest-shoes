@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { ArrowLeft, MapPin, CreditCard, Truck } from 'lucide-react'
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
+export default function OrderDetailClient({ id }: { id: string }) {
   const router = useRouter()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -17,10 +17,10 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     loadOrder()
-  }, [params.id])
+  }, [id])
 
   async function loadOrder() {
-    const snap = await getDoc(doc(db, 'orders', params.id))
+    const snap = await getDoc(doc(db, 'orders', id))
     if (snap.exists()) setOrder({ id: snap.id, ...snap.data() } as Order)
     setLoading(false)
   }
@@ -41,7 +41,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
   return (
     <div className="p-6">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
+      <button onClick={() => router.push('/orders')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
         <ArrowLeft size={16} /> Back to Orders
       </button>
       <div className="mb-6">
@@ -49,11 +49,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
         <p className="text-sm text-gray-400 mt-1">{formatDateTime(order.createdAt)}</p>
       </div>
       <div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left: Order details */}
           <div className="lg:col-span-2 space-y-5">
-            {/* Items */}
             <div className="card p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Order Items</h3>
               <div className="space-y-4">
@@ -68,7 +65,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                         Size: {item.size} · Color: {item.color} · Qty: {item.quantity}
                       </p>
                       {item.engravingText && (
-                        <p className="text-xs text-[#6c63ff] font-medium">Engraving: "{item.engravingText}"</p>
+                        <p className="text-xs text-[#6c63ff] font-medium">Engraving: &quot;{item.engravingText}&quot;</p>
                       )}
                     </div>
                     <div className="text-right">
@@ -80,7 +77,6 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                   </div>
                 ))}
               </div>
-
               <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Subtotal</span><span>{formatCurrency(order.subtotal)}</span>
@@ -105,7 +101,6 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* Delivery address */}
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-4">
                 <MapPin size={18} className="text-[#6c63ff]" />
@@ -121,18 +116,15 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* Note */}
             {order.note && (
               <div className="card p-6">
                 <h3 className="font-semibold text-gray-900 mb-2">Customer Note</h3>
-                <p className="text-sm text-gray-600 italic">"{order.note}"</p>
+                <p className="text-sm text-gray-600 italic">&quot;{order.note}&quot;</p>
               </div>
             )}
           </div>
 
-          {/* Right: Status & Payment */}
           <div className="space-y-5">
-            {/* Status */}
             <div className="card p-5">
               <h3 className="font-semibold text-gray-900 mb-3">Order Status</h3>
               <span className={`badge-${badge.color} mb-4 inline-block`}>{badge.label}</span>
@@ -151,7 +143,6 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* Payment info */}
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
                 <CreditCard size={16} className="text-[#6c63ff]" />
@@ -171,7 +162,6 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* Delivery info */}
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Truck size={16} className="text-[#6c63ff]" />
@@ -189,7 +179,6 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* Customer */}
             <div className="card p-5">
               <h3 className="font-semibold text-gray-900 mb-3">Customer</h3>
               <div className="text-sm space-y-1">

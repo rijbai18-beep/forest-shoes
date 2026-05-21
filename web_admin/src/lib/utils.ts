@@ -10,12 +10,14 @@ export function formatCurrency(amount: number): string {
   return `Rs ${amount.toLocaleString('en-MU', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 }
 
-export function formatDate(date: Date | { toDate: () => Date } | string | number): string {
+export function formatDate(date: Date | { toDate: () => Date } | string | number | null | undefined): string {
+  if (date == null) return '—'
   const d = typeof date === 'object' && 'toDate' in date ? date.toDate() : new Date(date as string | number | Date)
   return format(d, 'dd MMM yyyy')
 }
 
-export function formatDateTime(date: Date | { toDate: () => Date } | string | number): string {
+export function formatDateTime(date: Date | { toDate: () => Date } | string | number | null | undefined): string {
+  if (date == null) return '—'
   const d = typeof date === 'object' && 'toDate' in date ? date.toDate() : new Date(date as string | number | Date)
   return format(d, 'dd MMM yyyy, HH:mm')
 }

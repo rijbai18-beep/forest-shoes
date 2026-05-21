@@ -10,7 +10,7 @@ import toast from 'react-hot-toast'
 import { Send, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
-export default function TicketDetailPage({ params }: { params: { id: string } }) {
+export default function TicketDetail({ id }: { id: string }) {
   const { user } = useAuth()
   const [ticket, setTicket] = useState<SupportTicket | null>(null)
   const [messages, setMessages] = useState<TicketMessage[]>([])
@@ -22,18 +22,18 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
   useEffect(() => {
     loadTicket()
     const unsub = onSnapshot(
-      query(collection(db, 'supportTickets', params.id, 'messages'), orderBy('createdAt', 'asc')),
+      query(collection(db, 'supportTickets', id, 'messages'), orderBy('createdAt', 'asc')),
       snap => setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() } as TicketMessage)))
     )
     return unsub
-  }, [params.id])
+  }, [id])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   async function loadTicket() {
-    const snap = await getDoc(doc(db, 'supportTickets', params.id))
+    const snap = await getDoc(doc(db, 'supportTickets', id))
     if (snap.exists()) setTicket({ id: snap.id, ...snap.data() } as SupportTicket)
   }
 
@@ -42,7 +42,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
     if (!reply.trim()) return
     setSending(true)
     try {
-      await addDoc(collection(db, 'supportTickets', params.id, 'messages'), {
+      await addDoc(collection(db, 'supportTickets', id, 'messages'), {
         message: reply.trim(),
         senderId: user?.uid,
         senderName: 'Support Team',
@@ -50,7 +50,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
         createdAt: serverTimestamp(),
       })
       if (ticket?.status === 'open') {
-        await updateDoc(doc(db, 'supportTickets', params.id), { status: 'in_progress' })
+        await updateDoc(doc(db, 'supportTickets', id), { status: 'in_progress' })
         setTicket(t => t ? { ...t, status: 'in_progress' } : t)
       }
       setReply('')
@@ -65,7 +65,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
     if (!confirm('Close this ticket? The customer will be unable to send further messages.')) return
     setClosing(true)
     try {
-      await updateDoc(doc(db, 'supportTickets', params.id), { status: 'closed' })
+      await updateDoc(doc(db, 'supportTickets', id), { status: 'closed' })
       setTicket(t => t ? { ...t, status: 'closed' } : t)
       toast.success('Ticket closed')
     } finally {
@@ -81,7 +81,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
     <div className="flex flex-col h-screen">
       <div className="px-6 pt-6 pb-2 border-b border-gray-100">
         <h1 className="text-xl font-bold text-gray-900 truncate">{ticket.subject}</h1>
-        <p className="text-xs text-gray-400 mt-0.5">Ticket {params.id.slice(0, 8)} · {ticket.userName ?? ticket.userId}</p>
+        <p className="text-xs text-gray-400 mt-0.5">Ticket {id.slice(0, 8)} · {ticket.userName ?? ticket.userId}</p>
       </div>
       <div className="px-6 pb-2 pt-3 flex items-center gap-3">
         <Link href="/support" className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
@@ -101,7 +101,6 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
       </div>
 
       <div className="flex flex-1 overflow-hidden px-6 pb-6 gap-5">
-        {/* Chat */}
         <div className="flex-1 flex flex-col card overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
@@ -144,7 +143,6 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
           )}
         </div>
 
-        {/* Ticket info sidebar */}
         <div className="w-72 space-y-4">
           <div className="card p-4">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Ticket Info</h3>

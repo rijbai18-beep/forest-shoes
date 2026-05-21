@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { collection, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { SupportTicket } from '@/types'
@@ -8,10 +9,15 @@ import { formatDateTime } from '@/lib/utils'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { MessageSquare, Clock, CheckCircle, Search } from 'lucide-react'
+import TicketDetail from './TicketDetail'
 
 const STATUS_FILTERS = ['all', 'open', 'in_progress', 'closed'] as const
 
 export default function SupportPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const selectedId = searchParams.get('id')
+
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -51,6 +57,8 @@ export default function SupportPage() {
     in_progress: tickets.filter(t => t.status === 'in_progress').length,
     closed: tickets.filter(t => t.status === 'closed').length,
   }
+
+  if (selectedId) return <TicketDetail id={selectedId} />
 
   return (
     <main className="p-6 space-y-6">
@@ -130,7 +138,7 @@ export default function SupportPage() {
                   <td className="table-td text-gray-500 text-sm">{formatDateTime(ticket.createdAt)}</td>
                   <td className="table-td">
                     <div className="flex items-center gap-2">
-                      <Link href={`/support/${ticket.id}`} className="btn-secondary text-xs py-1.5 px-3">View</Link>
+                      <Link href={`/support?id=${ticket.id}`} className="btn-secondary text-xs py-1.5 px-3">View</Link>
                       {ticket.status === 'open' && (
                         <button onClick={() => setInProgress(ticket.id)} className="text-xs px-3 py-1.5 rounded-lg border border-amber-200 text-amber-700 hover:bg-amber-50 transition-colors">In Progress</button>
                       )}

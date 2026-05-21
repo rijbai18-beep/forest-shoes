@@ -17,133 +17,115 @@ class CartItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: item.imageUrl,
-                width: 90,
-                height: 90,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  width: 90,
-                  height: 90,
-                  color: AppColors.divider,
-                ),
-                errorWidget: (_, __, ___) => Container(
-                  width: 90,
-                  height: 90,
-                  color: AppColors.background,
-                  child: const Icon(Icons.image_not_supported_outlined,
-                      color: AppColors.textHint),
-                ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Product image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedNetworkImage(
+              imageUrl: item.imageUrl,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(
+                width: 80, height: 80,
+                color: AppColors.cream,
+                child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+              ),
+              errorWidget: (_, __, ___) => Container(
+                width: 80, height: 80,
+                color: AppColors.cream,
+                child: const Icon(Icons.image_not_supported_outlined, color: AppColors.textHint, size: 28),
               ),
             ),
-            const SizedBox(width: 12),
+          ),
+          const SizedBox(width: 12),
 
-            // Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded,
-                            size: 18, color: AppColors.textHint),
-                        onPressed: onRemove,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _Tag('Size: ${item.size}'),
-                      _Tag('Color: ${item.color}'),
-                    ],
-                  ),
-                  if (item.hasEngraving && item.engravingText != null) ...[
-                    const SizedBox(height: 4),
-                    _Tag('Engraving: "${item.engravingText}"',
-                        color: AppColors.primary),
-                  ],
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Column(
+          // Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name + delete
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Rs ${item.price.toStringAsFixed(0)}',
+                            item.name,
                             style: const TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: AppColors.textPrimary,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (item.hasEngraving)
-                            Text(
-                              '+Rs ${item.engravingFee.toStringAsFixed(0)} engraving',
-                              style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 11),
-                            ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Size ${item.size}  ·  ${item.color}',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
                         ],
                       ),
-                      const Spacer(),
-                      _QuantityControl(
-                        quantity: item.quantity,
-                        onChanged: onQuantityChanged,
+                    ),
+                    GestureDetector(
+                      onTap: onRemove,
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(
+                            color: Color(0xFFE53935),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Price + quantity controls
+                Row(
+                  children: [
+                    Text(
+                      'Rs.${item.price.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                    if (item.hasEngraving)
+                      Text(
+                        ' +Rs.${item.engravingFee.toStringAsFixed(0)}',
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                      ),
+                    const Spacer(),
+                    _QuantityControl(quantity: item.quantity, onChanged: onQuantityChanged),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-class _Tag extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  const _Tag(this.text, {this.color = AppColors.textSecondary});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(text,
-          style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w500)),
     );
   }
 }
@@ -158,46 +140,54 @@ class _QuantityControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        InkWell(
-          onTap: quantity > 1 ? () => onChanged(quantity - 1) : null,
-          borderRadius: BorderRadius.circular(6),
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: AppColors.divider),
-            ),
-            child: Icon(
-              Icons.remove_rounded,
-              size: 16,
-              color:
-                  quantity > 1 ? AppColors.textPrimary : AppColors.textHint,
-            ),
+        _QtyBtn(
+          icon: Icons.remove_rounded,
+          enabled: quantity > 1,
+          onTap: () => onChanged(quantity - 1),
+        ),
+        SizedBox(
+          width: 32,
+          child: Text(
+            '$quantity',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textPrimary),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('$quantity',
-              style: const TextStyle(
-                  fontWeight: FontWeight.w600, fontSize: 15)),
-        ),
-        InkWell(
+        _QtyBtn(
+          icon: Icons.add_rounded,
+          enabled: true,
           onTap: () => onChanged(quantity + 1),
-          borderRadius: BorderRadius.circular(6),
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Icon(Icons.add_rounded,
-                size: 16, color: AppColors.primary),
-          ),
         ),
       ],
+    );
+  }
+}
+
+class _QtyBtn extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _QtyBtn({required this.icon, required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: enabled ? AppColors.cream : const Color(0xFFF0EAD8),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: enabled ? AppColors.primary : AppColors.textHint,
+        ),
+      ),
     );
   }
 }

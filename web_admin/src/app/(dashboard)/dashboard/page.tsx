@@ -191,7 +191,7 @@ export default function DashboardPage() {
             ) : recent.map(o => {
               const s = getStatusBadge(o.status, ORDER_STATUSES)
               return (
-                <TableRow key={o.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => window.location.href = `/orders/${o.id}`}>
+                <TableRow key={o.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => window.location.href = `/orders?id=${o.id}`}>
                   <TableCell className="font-mono font-bold text-brand-600">#{o.id.slice(0,8).toUpperCase()}</TableCell>
                   <TableCell className="font-medium">{o.address?.name ?? '—'}</TableCell>
                   <TableCell className="text-gray-500">{formatDate(o.createdAt)}</TableCell>

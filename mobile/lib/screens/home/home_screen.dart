@@ -32,13 +32,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final productProvider = context.read<ProductProvider>();
     await productProvider.loadHomeData();
 
-    final banners = await OrderService().getBanners();
-    if (!mounted) return;
-    setState(() {
-      _banners = banners;
-      _loadingBanners = false;
-    });
+    try {
+      final banners = await OrderService().getBanners();
+      if (!mounted) return;
+      setState(() {
+        _banners = banners;
+        _loadingBanners = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingBanners = false);
+    }
 
+    if (!mounted) return;
     final auth = context.read<AuthProvider>();
     if (auth.isLoggedIn) {
       productProvider.listenToWishlist(auth.user!.uid);
@@ -53,37 +59,28 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
-        color: Colors.white,
-        backgroundColor: AppColors.primary,
+        color: AppColors.primary,
+        backgroundColor: Colors.white,
         onRefresh: _loadData,
         child: CustomScrollView(
           slivers: [
-            // ── Gradient App Bar ──────────────────────────────────────────
+            // ── App Bar ───────────────────────────────────────────────────
             SliverAppBar(
               floating: true,
               snap: true,
               elevation: 0,
-              backgroundColor: Colors.transparent,
-              flexibleSpace: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              ),
+              backgroundColor: AppColors.surface,
+              surfaceTintColor: Colors.transparent,
               title: Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.forest_rounded,
-                        color: Colors.white, size: 22),
+                    child: const Icon(Icons.forest_rounded, color: Colors.white, size: 22),
                   ),
                   const SizedBox(width: 10),
                   Column(
@@ -91,19 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const Text(
                         'Forest Shoes',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                       ),
                       if (auth.isLoggedIn)
                         Text(
                           'Hello, ${auth.user?.name.split(' ').first ?? ''}!',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.75),
-                          ),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                         ),
                     ],
                   ),
@@ -111,22 +101,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.search_rounded, color: Colors.white),
+                  icon: const Icon(Icons.search_rounded, color: AppColors.textPrimary),
                   onPressed: () => context.go('/shop'),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_outlined,
-                      color: Colors.white),
+                  icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
                   onPressed: () => context.push('/notifications'),
                 ),
                 if (auth.isLoggedIn)
                   IconButton(
-                    icon: const Icon(Icons.favorite_border_rounded,
-                        color: Colors.white),
+                    icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
                     onPressed: () => context.push('/wishlist'),
                   ),
                 const SizedBox(width: 4),
               ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Container(height: 1, color: AppColors.divider),
+              ),
             ),
 
             // ── Banner carousel ───────────────────────────────────────────
@@ -194,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _SectionHeader(
+                    const _SectionHeader(
                       title: 'Shop by Style',
                       padding: EdgeInsets.zero,
                     ),
@@ -576,8 +568,8 @@ class _UspSection extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: const [
+      child: const Column(
+        children: [
           _UspItem(
             icon: Icons.local_shipping_outlined,
             title: 'Free Delivery',

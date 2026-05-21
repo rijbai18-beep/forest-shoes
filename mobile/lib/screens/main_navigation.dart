@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:badges/badges.dart' as badges;
 import '../config/theme.dart';
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
@@ -36,6 +36,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   void _onTabTapped(int index) {
     if (_currentIndex == index) return;
+    HapticFeedback.selectionClick();
     setState(() => _currentIndex = index);
     context.go(_tabs[index]);
   }
@@ -55,57 +56,76 @@ class _MainNavigationState extends State<MainNavigation> {
 
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x1A000000),
-              blurRadius: 20,
-              offset: Offset(0, -4),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'Home',
-                  isActive: _currentIndex == 0,
-                  onTap: () => _onTabTapped(0),
-                ),
-                _NavItem(
-                  icon: Icons.shopping_bag_outlined,
-                  activeIcon: Icons.shopping_bag_rounded,
-                  label: 'Shop',
-                  isActive: _currentIndex == 1,
-                  onTap: () => _onTabTapped(1),
-                ),
-                _NavItem(
-                  icon: Icons.shopping_cart_outlined,
-                  activeIcon: Icons.shopping_cart_rounded,
-                  label: 'Cart',
-                  isActive: _currentIndex == 2,
-                  onTap: () => _onTabTapped(2),
-                  badge: cartCount > 0 ? cartCount.toString() : null,
-                ),
-                _NavItem(
-                  icon: Icons.settings_outlined,
-                  activeIcon: Icons.settings_rounded,
-                  label: 'Settings',
-                  isActive: _currentIndex == 3,
-                  onTap: () => _onTabTapped(3),
-                  badge: _unreadNotifications > 0
-                      ? _unreadNotifications.toString()
-                      : null,
-                ),
-              ],
-            ),
+      bottomNavigationBar: _BottomNav(
+        currentIndex: _currentIndex,
+        cartCount: cartCount,
+        notifCount: _unreadNotifications,
+        onTap: _onTabTapped,
+      ),
+    );
+  }
+}
+
+class _BottomNav extends StatelessWidget {
+  final int currentIndex;
+  final int cartCount;
+  final int notifCount;
+  final void Function(int) onTap;
+
+  const _BottomNav({
+    required this.currentIndex,
+    required this.cartCount,
+    required this.notifCount,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: Color(0xFFEEE8D8), width: 1)),
+        boxShadow: [
+          BoxShadow(color: Color(0x18000000), blurRadius: 16, offset: Offset(0, -4)),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: [
+              _NavTab(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
+                label: 'Home',
+                isActive: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _NavTab(
+                icon: Icons.shopping_bag_outlined,
+                activeIcon: Icons.shopping_bag_rounded,
+                label: 'Shop',
+                isActive: currentIndex == 1,
+                onTap: () => onTap(1),
+              ),
+              _NavTab(
+                icon: Icons.shopping_cart_outlined,
+                activeIcon: Icons.shopping_cart_rounded,
+                label: 'Cart',
+                isActive: currentIndex == 2,
+                onTap: () => onTap(2),
+                badge: cartCount > 0 ? '$cartCount' : null,
+              ),
+              _NavTab(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                label: 'Profile',
+                isActive: currentIndex == 3,
+                onTap: () => onTap(3),
+                badge: notifCount > 0 ? '$notifCount' : null,
+              ),
+            ],
           ),
         ),
       ),
@@ -113,7 +133,7 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 }
 
-class _NavItem extends StatelessWidget {
+class _NavTab extends StatelessWidget {
   final IconData icon;
   final IconData activeIcon;
   final String label;
@@ -121,7 +141,7 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
   final String? badge;
 
-  const _NavItem({
+  const _NavTab({
     required this.icon,
     required this.activeIcon,
     required this.label,
@@ -132,47 +152,58 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: isActive
-            ? BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-              )
-            : null,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            badge != null
-                ? badges.Badge(
-                    badgeContent: Text(
-                      badge!,
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    ),
-                    child: Icon(
-                      isActive ? activeIcon : icon,
-                      color: isActive ? AppColors.primary : AppColors.textHint,
-                      size: 26,
-                    ),
-                  )
-                : Icon(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOut,
+              width: isActive ? 52 : 44,
+              height: isActive ? 36 : 32,
+              decoration: BoxDecoration(
+                color: isActive ? AppColors.primary : Colors.transparent,
+                borderRadius: BorderRadius.circular(isActive ? 20 : 12),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(
                     isActive ? activeIcon : icon,
-                    color: isActive ? AppColors.primary : AppColors.textHint,
-                    size: 26,
+                    size: 22,
+                    color: isActive ? Colors.white : AppColors.textHint,
                   ),
+                  if (badge != null)
+                    Positioned(
+                      top: 3,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: AppColors.sale,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          badge!,
+                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(
-              label,
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 220),
               style: TextStyle(
                 fontSize: 11,
-                fontWeight:
-                    isActive ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive ? AppColors.primary : AppColors.textHint,
               ),
+              child: Text(label),
             ),
           ],
         ),
