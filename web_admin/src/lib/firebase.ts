@@ -1,11 +1,9 @@
-import { initializeApp, getApps, getApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
-import { getAuth } from 'firebase/auth'
-import { getStorage } from 'firebase/storage'
-import { getFunctions } from 'firebase/functions'
-import { getMessaging } from 'firebase/messaging'
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app'
+import { getFirestore, Firestore } from 'firebase/firestore'
+import { getAuth, Auth } from 'firebase/auth'
+import { getStorage, FirebaseStorage } from 'firebase/storage'
+import { getFunctions, Functions } from 'firebase/functions'
 
-// TODO: Replace with your Firebase project config
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -15,10 +13,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig)
+function getFirebaseApp(): FirebaseApp {
+  if (getApps().length) return getApp()
+  return initializeApp(firebaseConfig)
+}
 
-export const db = getFirestore(app)
-export const auth = getAuth(app)
-export const storage = getStorage(app)
-export const functions = getFunctions(app)
+const app = typeof window !== 'undefined' ? getFirebaseApp() : ({} as FirebaseApp)
+
+export const db = typeof window !== 'undefined' ? getFirestore(app) : ({} as Firestore)
+export const auth = typeof window !== 'undefined' ? getAuth(app) : ({} as Auth)
+export const storage = typeof window !== 'undefined' ? getStorage(app) : ({} as FirebaseStorage)
+export const functions = typeof window !== 'undefined' ? getFunctions(app) : ({} as Functions)
 export default app
