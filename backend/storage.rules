@@ -38,6 +38,12 @@ service firebase.storage {
       allow write: if isAdmin() && isValidImageStrict();
     }
 
+    // Branding assets (logo, splash, etc.) - admin only
+    match /branding/{file} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage();
+    }
+
     // User profile images
     match /users/{userId}/profile/{imageFile} {
       allow read: if isAuthenticated();

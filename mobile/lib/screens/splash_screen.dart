@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const AppLogoWidget(size: 120),
+              const AppLogoWidget(size: 120, onDark: true),
               const SizedBox(height: 24),
               const Text(
                 'FOREST SHOES',
