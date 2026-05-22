@@ -32,10 +32,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.read<AuthProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
+    final redirect = GoRouterState.of(context).uri.queryParameters['redirect'];
     final success = await auth.signIn(_emailCtrl.text, _passCtrl.text);
     if (!mounted) return;
     if (success) {
-      router.go('/home');
+      router.go(redirect ?? '/home');
     } else {
       messenger.showSnackBar(
         SnackBar(content: Text(auth.errorMessage ?? 'Login failed.')),

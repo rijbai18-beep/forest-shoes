@@ -44,11 +44,7 @@ class _SplashScreenState extends State<SplashScreen>
       await Future.delayed(const Duration(milliseconds: 100));
     }
     if (!mounted) return;
-    if (auth.isLoggedIn) {
-      context.go('/home');
-    } else {
-      context.go('/login');
-    }
+    context.go('/home');
   }
 
   @override

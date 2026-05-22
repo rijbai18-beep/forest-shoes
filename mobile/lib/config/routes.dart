@@ -42,19 +42,26 @@ class AppRoutes {
   static const ticketDetail = '/support/:id';
 }
 
+const _authRequiredRoutes = {
+  AppRoutes.checkout,
+  AppRoutes.profile,
+  AppRoutes.orderHistory,
+  AppRoutes.wishlist,
+  AppRoutes.support,
+};
+
 GoRouter createRouter(BuildContext context) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       final auth = context.read<AuthProvider>();
-      final isLoggedIn = auth.isLoggedIn;
-      final isOnAuthRoute =
-          state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.register;
-
       if (!auth.isInitialized) return null;
-      if (!isLoggedIn && !isOnAuthRoute && state.matchedLocation != AppRoutes.splash) {
-        if (state.matchedLocation == AppRoutes.checkout) return AppRoutes.login;
+      final loc = state.matchedLocation;
+      final needsAuth = _authRequiredRoutes.contains(loc) ||
+          loc.startsWith('/orders') ||
+          loc.startsWith('/support/');
+      if (needsAuth && !auth.isLoggedIn) {
+        return '${AppRoutes.login}?redirect=${Uri.encodeComponent(loc)}';
       }
       return null;
     },
