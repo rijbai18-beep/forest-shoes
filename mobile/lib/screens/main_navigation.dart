@@ -16,7 +16,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final _tabs = ['/home', '/cart', '/settings'];
+  final _tabs = ['/home', '/shop', '/cart', '/settings'];
 
   void _onTabTapped(int index) {
     if (_currentIndex == index) return;
@@ -85,19 +85,26 @@ class _BottomNav extends StatelessWidget {
                 onTap: () => onTap(0),
               ),
               _NavTab(
-                icon: Icons.shopping_cart_outlined,
-                activeIcon: Icons.shopping_cart_rounded,
-                label: 'My Cart',
+                icon: Icons.shopping_bag_outlined,
+                activeIcon: Icons.shopping_bag_rounded,
+                label: 'Shop',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
+              ),
+              _NavTab(
+                icon: Icons.shopping_cart_outlined,
+                activeIcon: Icons.shopping_cart_rounded,
+                label: 'Cart',
+                isActive: currentIndex == 2,
+                onTap: () => onTap(2),
                 badge: cartCount > 0 ? '$cartCount' : null,
               ),
               _NavTab(
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
-                label: 'My Account',
-                isActive: currentIndex == 2,
-                onTap: () => onTap(2),
+                label: 'Profile',
+                isActive: currentIndex == 3,
+                onTap: () => onTap(3),
               ),
             ],
           ),
@@ -170,8 +177,7 @@ class _NavTab extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight:
-                    isActive ? FontWeight.w700 : FontWeight.w400,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                 color: color,
               ),
             ),
