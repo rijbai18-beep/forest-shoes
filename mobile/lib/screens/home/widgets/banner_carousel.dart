@@ -23,52 +23,47 @@ class _BannerCarouselState extends State<BannerCarousel> {
       children: [
         CarouselSlider(
           options: CarouselOptions(
-            height: 200,
+            height: 220,
             autoPlay: true,
             autoPlayInterval: const Duration(seconds: 4),
             enlargeCenterPage: false,
             viewportFraction: 1.0,
-            onPageChanged: (index, _) =>
-                setState(() => _current = index),
+            onPageChanged: (index, _) => setState(() => _current = index),
           ),
           items: widget.banners.map((banner) {
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+            // Full-width, no horizontal margin, no border radius
+            return CachedNetworkImage(
+              imageUrl: banner.imageUrl,
+              cacheManager: AppCacheManager(),
+              fit: BoxFit.cover,
+              width: double.infinity,
+              placeholder: (_, __) => Container(
                 color: AppColors.divider,
+                child: const Center(
+                    child:
+                        CircularProgressIndicator(strokeWidth: 2)),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: CachedNetworkImage(
-                imageUrl: banner.imageUrl,
-                cacheManager: AppCacheManager(),
-                fit: BoxFit.cover,
-                width: double.infinity,
-                placeholder: (_, __) => Container(
-                  color: AppColors.divider,
-                  child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2)),
-                ),
-                errorWidget: (_, __, ___) => Container(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  child: const Icon(Icons.image_not_supported_outlined,
-                      color: AppColors.textHint),
-                ),
+              errorWidget: (_, __, ___) => Container(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                child: const Icon(Icons.image_not_supported_outlined,
+                    color: AppColors.textHint),
               ),
             );
           }).toList(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         AnimatedSmoothIndicator(
           activeIndex: _current,
           count: widget.banners.length,
-          effect: const ExpandingDotsEffect(
+          effect: const WormEffect(
             dotWidth: 8,
             dotHeight: 8,
             activeDotColor: AppColors.primary,
-            dotColor: AppColors.divider,
+            dotColor: Color(0xFFCCCCCC),
+            spacing: 6,
           ),
         ),
+        const SizedBox(height: 4),
       ],
     );
   }

@@ -10,7 +10,6 @@ import '../../widgets/common/loading_widget.dart';
 import 'widgets/banner_carousel.dart';
 import 'widgets/category_section.dart';
 import 'widgets/featured_products_section.dart';
-import '../../widgets/common/app_logo_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,61 +55,120 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final products = context.watch<ProductProvider>();
+    final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF5F5F5),
       body: RefreshIndicator(
         color: AppColors.primary,
         backgroundColor: Colors.white,
         onRefresh: _loadData,
         child: CustomScrollView(
           slivers: [
-            // ── App Bar ───────────────────────────────────────────────────
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              elevation: 0,
-              backgroundColor: AppColors.surface,
-              surfaceTintColor: Colors.transparent,
-              title: Row(
-                children: [
-                  const AppLogoWidget(size: 38),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Forest Shoes',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                      ),
-                      if (auth.isLoggedIn)
-                        Text(
-                          'Hello, ${auth.user?.name.split(' ').first ?? ''}!',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            // ── Search + location header ──────────────────────────────────
+            SliverToBoxAdapter(
+              child: Container(
+                color: const Color(0xFFF5F5F5),
+                padding: EdgeInsets.fromLTRB(16, topPad + 14, 16, 12),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        // Search pill
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => context.go('/shop'),
+                            child: Container(
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x0A000000),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Row(
+                                children: [
+                                  SizedBox(width: 16),
+                                  Icon(Icons.search_rounded,
+                                      color: AppColors.textHint, size: 22),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      'Search shoes...',
+                                      style: TextStyle(
+                                          color: AppColors.textHint,
+                                          fontSize: 15),
+                                    ),
+                                  ),
+                                  Icon(Icons.camera_alt_outlined,
+                                      color: AppColors.textHint, size: 20),
+                                  SizedBox(width: 16),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.search_rounded, color: AppColors.textPrimary),
-                  onPressed: () => context.go('/shop'),
+                        const SizedBox(width: 10),
+                        // Notification bell
+                        GestureDetector(
+                          onTap: () => context.push('/notifications'),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0x0A000000),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.notifications_outlined,
+                                color: AppColors.textPrimary, size: 22),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Location row
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined,
+                            color: AppColors.primary, size: 18),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Deliver to  ',
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 13),
+                        ),
+                        Expanded(
+                          child: Text(
+                            auth.isLoggedIn
+                                ? (auth.user?.name ?? 'Forest Shoes, Mauritius')
+                                : 'Forest Shoes, Mauritius',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Icon(Icons.keyboard_arrow_down_rounded,
+                            color: AppColors.textSecondary, size: 20),
+                      ],
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
-                  onPressed: () => context.push('/notifications'),
-                ),
-                if (auth.isLoggedIn)
-                  IconButton(
-                    icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
-                    onPressed: () => context.push('/wishlist'),
-                  ),
-                const SizedBox(width: 4),
-              ],
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(1),
-                child: Container(height: 1, color: AppColors.divider),
               ),
             ),
 
@@ -118,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(
               child: _loadingBanners
                   ? const SizedBox(
-                      height: 210,
+                      height: 220,
                       child: Center(
                           child: CircularProgressIndicator(
                               color: AppColors.primary)),
@@ -127,6 +185,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? BannerCarousel(banners: _banners)
                       : const _DefaultHeroBanner(),
             ),
+
+            // ── Special Offers (sale products) ────────────────────────────
+            if (products.saleProducts.isNotEmpty) ...[
+              SliverToBoxAdapter(
+                child: _SectionHeader(
+                  title: 'Special Offers',
+                  onSeeAll: () => context.go('/shop'),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: FeaturedProductsSection(
+                  products: products.saleProducts,
+                  showSaleBadge: true,
+                ),
+              ),
+            ],
 
             // ── Categories ───────────────────────────────────────────────
             SliverToBoxAdapter(
@@ -139,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
             ),
 
-            // ── Featured Products ─────────────────────────────────────────
+            // ── Featured ─────────────────────────────────────────────────
             if (products.featuredProducts.isNotEmpty) ...[
               SliverToBoxAdapter(
                 child: _SectionHeader(
@@ -154,36 +228,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
 
-            // ── Hot Deals ────────────────────────────────────────────────
-            if (products.saleProducts.isNotEmpty) ...[
-              SliverToBoxAdapter(
-                child: _SectionHeader(
-                  title: 'Hot Deals',
-                  subtitle: 'Limited time offers',
-                  onSeeAll: () => context.go('/shop'),
-                  isHot: true,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: FeaturedProductsSection(
-                  products: products.saleProducts,
-                  showSaleBadge: true,
-                ),
-              ),
-            ],
-
-            // ── Shop by Gender ────────────────────────────────────────────
+            // ── Shop by Style ─────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _SectionHeader(
+                    _SectionHeader(
                       title: 'Shop by Style',
-                      padding: EdgeInsets.zero,
+                      onSeeAll: () => context.go('/shop'),
+                      padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
                     ),
-                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
@@ -249,32 +305,17 @@ class _DefaultHeroBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 210,
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF388E3C)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      height: 220,
+      color: const Color(0xFF1B5E20),
       child: Stack(
         children: [
-          // Decorative circles
+          // Background decorative circles
           Positioned(
             right: -30,
             top: -30,
             child: Container(
-              width: 160,
-              height: 160,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.06),
@@ -282,79 +323,69 @@ class _DefaultHeroBanner extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 20,
-            bottom: -40,
+            right: 40,
+            bottom: -50,
             child: Container(
-              width: 120,
-              height: 120,
+              width: 150,
+              height: 150,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.06),
               ),
             ),
           ),
-          // Forest icon watermark
           Positioned(
             right: 16,
             bottom: 16,
             child: Icon(
               Icons.forest_rounded,
-              size: 100,
-              color: Colors.white.withValues(alpha: 0.08),
+              size: 120,
+              color: Colors.white.withValues(alpha: 0.07),
             ),
           ),
           // Content
           Padding(
-            padding: const EdgeInsets.all(26),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'New Collection',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
                 const Text(
                   'Step Into\nNature',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 30,
+                    fontSize: 32,
                     fontWeight: FontWeight.w800,
                     height: 1.15,
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
+                Text(
+                  'Get discounts up to 50% on\npremium footwear',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Builder(
                   builder: (ctx) => GestureDetector(
                     onTap: () => ctx.go('/shop'),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
+                          horizontal: 24, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                       child: const Text(
-                        'Shop Now →',
+                        'Shop Now',
                         style: TextStyle(
                           color: Color(0xFF1B5E20),
                           fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -373,17 +404,13 @@ class _DefaultHeroBanner extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
-  final String? subtitle;
   final VoidCallback? onSeeAll;
-  final bool isHot;
   final EdgeInsets padding;
 
   const _SectionHeader({
     required this.title,
-    this.subtitle,
     this.onSeeAll,
-    this.isHot = false,
-    this.padding = const EdgeInsets.fromLTRB(16, 28, 12, 12),
+    this.padding = const EdgeInsets.fromLTRB(16, 24, 16, 12),
   });
 
   @override
@@ -393,67 +420,27 @@ class _SectionHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Left accent bar
-          Container(
-            width: 4,
-            height: 22,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(2),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.3,
             ),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  if (isHot) ...[
-                    const Text('🔥 ', style: TextStyle(fontSize: 15)),
-                  ],
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
-              ),
-              if (subtitle != null)
-                Text(
-                  subtitle!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-            ],
           ),
           const Spacer(),
           if (onSeeAll != null)
             GestureDetector(
               onTap: onSeeAll,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'See All →',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
+              child: const Text(
+                'See More',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                  decoration: TextDecoration.underline,
+                  decorationColor: AppColors.primary,
                 ),
               ),
             ),
@@ -491,9 +478,9 @@ class _GenderCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.first.withValues(alpha: 0.35),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
+              color: gradient.colors.first.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -502,11 +489,8 @@ class _GenderCard extends StatelessWidget {
             Positioned(
               right: -10,
               top: -10,
-              child: Icon(
-                icon,
-                size: 80,
-                color: Colors.white.withValues(alpha: 0.12),
-              ),
+              child: Icon(icon,
+                  size: 80, color: Colors.white.withValues(alpha: 0.12)),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -523,7 +507,6 @@ class _GenderCard extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
                     ),
                   ),
                   if (isWide) ...[
@@ -551,11 +534,11 @@ class _UspSection extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 28, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
-            color: AppColors.cardShadow,
+            color: Color(0x0A000000),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -608,9 +591,7 @@ class _UspItem extends StatelessWidget {
       decoration: BoxDecoration(
         border: isLast
             ? null
-            : const Border(
-                bottom: BorderSide(color: AppColors.divider),
-              ),
+            : const Border(bottom: BorderSide(color: AppColors.divider)),
       ),
       child: Row(
         children: [
@@ -632,22 +613,15 @@ class _UspItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+                Text(title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: AppColors.textPrimary)),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
+                Text(subtitle,
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 12)),
               ],
             ),
           ),

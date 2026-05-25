@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../providers/cart_provider.dart';
-import '../providers/auth_provider.dart';
-import '../services/notification_service.dart';
 
 class MainNavigation extends StatefulWidget {
   final Widget child;
@@ -17,22 +15,8 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  int _unreadNotifications = 0;
 
-  final _tabs = ['/home', '/shop', '/cart', '/settings'];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUnreadCount();
-  }
-
-  Future<void> _loadUnreadCount() async {
-    final auth = context.read<AuthProvider>();
-    if (auth.user == null) return;
-    final count = await NotificationService().getUnreadCount(auth.user!.uid);
-    if (mounted) setState(() => _unreadNotifications = count);
-  }
+  final _tabs = ['/home', '/cart', '/settings'];
 
   void _onTabTapped(int index) {
     if (_currentIndex == index) return;
@@ -59,7 +43,6 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: _BottomNav(
         currentIndex: _currentIndex,
         cartCount: cartCount,
-        notifCount: _unreadNotifications,
         onTap: _onTabTapped,
       ),
     );
@@ -69,13 +52,11 @@ class _MainNavigationState extends State<MainNavigation> {
 class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final int cartCount;
-  final int notifCount;
   final void Function(int) onTap;
 
   const _BottomNav({
     required this.currentIndex,
     required this.cartCount,
-    required this.notifCount,
     required this.onTap,
   });
 
@@ -83,10 +64,11 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: Color(0xFFEEE8D8), width: 1)),
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
         boxShadow: [
-          BoxShadow(color: Color(0x18000000), blurRadius: 16, offset: Offset(0, -4)),
+          BoxShadow(
+              color: Color(0x14000000), blurRadius: 12, offset: Offset(0, -4)),
         ],
       ),
       child: SafeArea(
@@ -103,27 +85,19 @@ class _BottomNav extends StatelessWidget {
                 onTap: () => onTap(0),
               ),
               _NavTab(
-                icon: Icons.shopping_bag_outlined,
-                activeIcon: Icons.shopping_bag_rounded,
-                label: 'Shop',
-                isActive: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
-              _NavTab(
                 icon: Icons.shopping_cart_outlined,
                 activeIcon: Icons.shopping_cart_rounded,
-                label: 'Cart',
-                isActive: currentIndex == 2,
-                onTap: () => onTap(2),
+                label: 'My Cart',
+                isActive: currentIndex == 1,
+                onTap: () => onTap(1),
                 badge: cartCount > 0 ? '$cartCount' : null,
               ),
               _NavTab(
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
-                label: 'Profile',
-                isActive: currentIndex == 3,
-                onTap: () => onTap(3),
-                badge: notifCount > 0 ? '$notifCount' : null,
+                label: 'My Account',
+                isActive: currentIndex == 2,
+                onTap: () => onTap(2),
               ),
             ],
           ),
@@ -152,6 +126,8 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = isActive ? AppColors.primary : const Color(0xFF9E9E9E);
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -159,51 +135,45 @@ class _NavTab extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              width: isActive ? 52 : 44,
-              height: isActive ? 36 : 32,
-              decoration: BoxDecoration(
-                color: isActive ? AppColors.primary : Colors.transparent,
-                borderRadius: BorderRadius.circular(isActive ? 20 : 12),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    isActive ? activeIcon : icon,
-                    size: 22,
-                    color: isActive ? Colors.white : AppColors.textHint,
-                  ),
-                  if (badge != null)
-                    Positioned(
-                      top: 3,
-                      right: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: AppColors.sale,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          badge!,
-                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
-                        ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isActive ? activeIcon : icon,
+                  size: 26,
+                  color: color,
+                ),
+                if (badge != null)
+                  Positioned(
+                    top: -4,
+                    right: -8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.sale,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 220),
+            Text(
+              label,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                color: isActive ? AppColors.primary : AppColors.textHint,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w400,
+                color: color,
               ),
-              child: Text(label),
             ),
           ],
         ),

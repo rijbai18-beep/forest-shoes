@@ -34,17 +34,18 @@ class ProductCard extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final productProvider = context.watch<ProductProvider>();
     final isWishlisted = productProvider.isWishlisted(product.id);
+    final hasSaleBadge = product.isOnSale && showSaleBadge;
 
     return GestureDetector(
       onTap: () => context.push('/product/${product.id}'),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: const [
             BoxShadow(
-              color: AppColors.cardShadow,
-              blurRadius: 12,
+              color: Color(0x0D000000),
+              blurRadius: 10,
               offset: Offset(0, 3),
             ),
           ],
@@ -52,57 +53,80 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image + overlays ──────────────────────────────────────────
+            // ── Image area ────────────────────────────────────────────────
             Stack(
               children: [
-                // Main image
+                // Product image — white background, contained
                 ClipRRect(
                   borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(18)),
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                   child: CachedNetworkImage(
                     imageUrl: product.images.isNotEmpty
                         ? product.images.first
                         : '',
                     cacheManager: AppCacheManager(),
-                    height: 160,
+                    height: 158,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      height: 160,
-                      color: const Color(0xFFF1F8E9),
-                      child: const Center(
+                    fit: BoxFit.contain,
+                    placeholder: (_, __) => const SizedBox(
+                      height: 158,
+                      child: Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                          strokeWidth: 2,
-                        ),
+                            strokeWidth: 2, color: AppColors.primary),
                       ),
                     ),
-                    errorWidget: (_, __, ___) => Container(
-                      height: 160,
-                      color: const Color(0xFFF1F8E9),
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: AppColors.textHint,
-                        size: 36,
+                    errorWidget: (_, __, ___) => const SizedBox(
+                      height: 158,
+                      child: Center(
+                        child: Icon(Icons.image_not_supported_outlined,
+                            color: AppColors.textHint, size: 36),
                       ),
                     ),
                   ),
                 ),
 
-                // Sale badge
-                if (product.isOnSale || showSaleBadge && product.isOnSale)
+                // Out of stock overlay
+                if (!product.inStock)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(16)),
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Out of Stock',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Discount badge — bottom-left, pill style
+                if (product.isOnSale)
                   Positioned(
-                    top: 10,
+                    bottom: 10,
                     left: 10,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.sale,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '-${product.discountPercentage.toInt()}%',
+                        '${product.discountPercentage.toInt()}% OFF',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -112,36 +136,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
 
-                // Out of stock overlay
-                if (!product.inStock)
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(18)),
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.65),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'Out of Stock',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // Wishlist button
+                // Wishlist button — top-right
                 if (auth.isLoggedIn)
                   Positioned(
                     top: 8,
@@ -157,7 +152,7 @@ class ProductCard extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 6,
                             ),
                           ],
@@ -175,11 +170,11 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
 
-                // Engraving badge
+                // Engravable badge
                 if (product.hasEngraving)
                   Positioned(
-                    bottom: 36,
-                    right: 8,
+                    top: 8,
+                    left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 3),
@@ -197,48 +192,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                // Quick View button (bottom gradient overlay)
-                if (product.inStock)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () => _showQuickView(context),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(0)),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.55),
-                            ],
-                          ),
-                        ),
-                        padding: const EdgeInsets.fromLTRB(8, 18, 8, 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.visibility_outlined,
-                                color: Colors.white, size: 13),
-                            const SizedBox(width: 5),
-                            const Text(
-                              'Quick View',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
 
@@ -248,54 +201,56 @@ class ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Name — uppercase
                   Text(
-                    product.name,
-                    maxLines: 2,
+                    product.name.toUpperCase(),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                      height: 1.3,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                      letterSpacing: 0.3,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      if (product.isOnSale) ...[
-                        Text(
-                          'Rs ${product.price.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textHint,
-                            decoration: TextDecoration.lineThrough,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                      ],
-                      Text(
-                        'Rs ${product.effectivePrice.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: product.isOnSale
-                              ? AppColors.sale
-                              : AppColors.primary,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 4),
+
+                  // Current price — large bold
+                  Text(
+                    'Rs ${product.effectivePrice.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
+
+                  // Original price — strikethrough
+                  if (product.isOnSale) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'Rs ${product.price.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textHint,
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: AppColors.textHint,
+                      ),
+                    ),
+                  ],
+
+                  // Rating
                   if (product.rating > 0) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
                         const Icon(Icons.star_rounded,
-                            size: 12, color: AppColors.gold),
+                            size: 14, color: AppColors.gold),
                         const SizedBox(width: 3),
                         Text(
                           '${product.rating.toStringAsFixed(1)} (${product.reviewCount})',
                           style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 11,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -335,7 +290,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   }
 
   void _addToCart() {
-    if (_selectedSize == null || _selectedColor == null) return;
+    if (widget.product.sizes.isNotEmpty && _selectedSize == null) return;
+    if (_selectedColor == null) return;
     context.read<CartProvider>().addItem(CartItemModel(
           productId: widget.product.id,
           name: widget.product.name,
@@ -343,7 +299,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
               ? widget.product.images.first
               : '',
           price: widget.product.effectivePrice,
-          size: _selectedSize!,
+          size: _selectedSize,
           color: _selectedColor!,
           quantity: 1,
           hasEngraving: false,
@@ -356,7 +312,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         content: const Text('Added to cart!'),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         action: SnackBarAction(
           label: 'View Cart',
           textColor: Colors.white,
@@ -395,30 +352,29 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image + info row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Thumbnail
                       ClipRRect(
                         borderRadius: BorderRadius.circular(14),
                         child: CachedNetworkImage(
-                          imageUrl: p.images.isNotEmpty ? p.images.first : '',
+                          imageUrl:
+                              p.images.isNotEmpty ? p.images.first : '',
                           cacheManager: AppCacheManager(),
                           width: 100,
                           height: 100,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           errorWidget: (_, __, ___) => Container(
                             width: 100,
                             height: 100,
-                            color: const Color(0xFFF1F8E9),
-                            child: const Icon(Icons.image_not_supported_outlined,
+                            color: const Color(0xFFF5F5F5),
+                            child: const Icon(
+                                Icons.image_not_supported_outlined,
                                 color: AppColors.textHint),
                           ),
                         ),
                       ),
                       const SizedBox(width: 14),
-                      // Details
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,13 +428,10 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    '(${p.reviewCount})',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
+                                  Text('(${p.reviewCount})',
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary)),
                                 ],
                               ),
                             ],
@@ -488,17 +441,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                     ],
                   ),
 
-                  // Size selector
                   if (p.sizes.isNotEmpty) ...[
                     const SizedBox(height: 18),
-                    const Text(
-                      'Select Size',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    const Text('Select Size',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
@@ -506,7 +455,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       children: p.sizes.map((size) {
                         final isSelected = _selectedSize == size;
                         return GestureDetector(
-                          onTap: () => setState(() => _selectedSize = size),
+                          onTap: () =>
+                              setState(() => _selectedSize = size),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             width: 50,
@@ -542,17 +492,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                     ),
                   ],
 
-                  // Color selector
                   if (p.colors.isNotEmpty) ...[
                     const SizedBox(height: 18),
-                    const Text(
-                      'Select Color',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    const Text('Select Color',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
@@ -560,7 +506,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       children: p.colors.map((color) {
                         final isSelected = _selectedColor == color;
                         return GestureDetector(
-                          onTap: () => setState(() => _selectedColor = color),
+                          onTap: () =>
+                              setState(() => _selectedColor = color),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             padding: const EdgeInsets.symmetric(
@@ -595,7 +542,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
             ),
           ),
 
-          // CTA buttons
           Padding(
             padding: EdgeInsets.fromLTRB(
                 20, 0, 20, MediaQuery.of(context).padding.bottom + 16),
@@ -605,8 +551,10 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary, width: 1.5),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(
+                          color: AppColors.primary, width: 1.5),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
@@ -614,10 +562,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       Navigator.pop(context);
                       context.push('/product/${p.id}');
                     },
-                    child: const Text(
-                      'Full Details',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
+                    child: const Text('Full Details',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -628,7 +574,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
@@ -638,10 +585,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       children: [
                         Icon(Icons.shopping_bag_outlined, size: 18),
                         SizedBox(width: 6),
-                        Text(
-                          'Add to Cart',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
+                        Text('Add to Cart',
+                            style:
+                                TextStyle(fontWeight: FontWeight.w700)),
                       ],
                     ),
                   ),
