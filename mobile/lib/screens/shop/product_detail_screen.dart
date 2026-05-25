@@ -67,7 +67,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _addToCart() {
-    if (_selectedSize == null) {
+    if (_product!.sizes.isNotEmpty && _selectedSize == null) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please select a size.')));
       return;
@@ -83,7 +83,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           name: _product!.name,
           imageUrl: _product!.images.isNotEmpty ? _product!.images.first : '',
           price: _product!.effectivePrice,
-          size: _selectedSize!,
+          size: _selectedSize,
           color: _selectedColor!,
           quantity: _quantity,
           hasEngraving: _engravingEnabled && _engravingText != null,
@@ -500,6 +500,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       EngravingWidget(
                         enabled: _engravingEnabled,
                         initialText: _engravingText,
+                        imageUrl: p.images.isNotEmpty ? p.images.first : null,
                         onChanged: (text) {
                           setState(() {
                             _engravingText = text;

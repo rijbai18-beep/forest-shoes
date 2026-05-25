@@ -78,7 +78,7 @@ class CartItemWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Size ${item.size}  ·  ${item.color}',
+                            item.size != null ? 'Size ${item.size}  ·  ${item.color}' : item.color,
                             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                         ],

@@ -275,6 +275,8 @@ export default function AddProductPage() {
                   </label>
                 </div>
 
+                <p className="text-xs text-gray-400 -mt-1">Leave unselected for products that don't require size (e.g. accessories, bags).</p>
+
                 {/* Size grid */}
                 <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
                   {SIZES.map(size => {

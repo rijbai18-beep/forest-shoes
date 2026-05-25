@@ -5,7 +5,7 @@ class CartItemModel {
   final String name;
   final String imageUrl;
   final double price;
-  final String size;
+  final String? size;
   final String color;
   int quantity;
   final bool hasEngraving;
@@ -17,7 +17,7 @@ class CartItemModel {
     required this.name,
     required this.imageUrl,
     required this.price,
-    required this.size,
+    this.size,
     required this.color,
     this.quantity = 1,
     this.hasEngraving = false,
@@ -66,7 +66,7 @@ class CartItemModel {
         name: map['name'] ?? '',
         imageUrl: map['imageUrl'] ?? '',
         price: (map['price'] ?? 0).toDouble(),
-        size: map['size'] ?? '',
+        size: map['size'],
         color: map['color'] ?? '',
         quantity: map['quantity'] ?? 1,
         hasEngraving: map['hasEngraving'] ?? false,

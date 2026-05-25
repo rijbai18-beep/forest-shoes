@@ -1,17 +1,21 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../config/cache_config.dart';
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 
 class EngravingWidget extends StatefulWidget {
   final bool enabled;
   final String? initialText;
+  final String? imageUrl;
   final void Function(String? text) onChanged;
 
   const EngravingWidget({
     super.key,
     required this.enabled,
     this.initialText,
+    this.imageUrl,
     required this.onChanged,
   });
 
@@ -110,7 +114,7 @@ class _EngravingWidgetState extends State<EngravingWidget> {
             ),
             const SizedBox(height: 12),
             // Text preview on shoe
-            _EngravingPreview(text: _ctrl.text),
+            _EngravingPreview(text: _ctrl.text, imageUrl: widget.imageUrl),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
@@ -144,55 +148,99 @@ class _EngravingWidgetState extends State<EngravingWidget> {
 
 class _EngravingPreview extends StatelessWidget {
   final String text;
-  const _EngravingPreview({required this.text});
+  final String? imageUrl;
+  const _EngravingPreview({required this.text, this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-      ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
       child: Stack(
-        alignment: Alignment.center,
+        alignment: Alignment.bottomCenter,
         children: [
-          const Icon(Icons.show_chart_rounded,
-              size: 80, color: Color(0x1A2E7D32)),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Preview',
-                  style: TextStyle(
-                      color: AppColors.textHint, fontSize: 11)),
-              const SizedBox(height: 4),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: text.isEmpty
-                    ? const Text(
-                        'Your text here',
-                        key: ValueKey('placeholder'),
-                        style: TextStyle(
-                            color: AppColors.textHint,
-                            fontSize: 18,
-                            fontStyle: FontStyle.italic),
-                      )
-                    : Text(
-                        text.toUpperCase(),
-                        key: ValueKey(text),
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 3,
-                        ),
-                      ),
+          // Product image (or placeholder background)
+          if (imageUrl != null && imageUrl!.isNotEmpty)
+            CachedNetworkImage(
+              imageUrl: imageUrl!,
+              cacheManager: AppCacheManager(),
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => _placeholder,
+              errorWidget: (_, __, ___) => _placeholder,
+            )
+          else
+            _placeholder,
+
+          // Dark gradient at bottom so text is always readable
+          Container(
+            height: 180,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Color(0xCC000000)],
+                stops: [0.45, 1.0],
               ),
-            ],
+            ),
+          ),
+
+          // Engraving text overlay
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: text.isEmpty
+                  ? const Text(
+                      'Your text here',
+                      key: ValueKey('placeholder'),
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 18,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: 2,
+                      ),
+                    )
+                  : Text(
+                      text.toUpperCase(),
+                      key: ValueKey(text),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 4,
+                        shadows: [
+                          Shadow(blurRadius: 4, color: Colors.black54),
+                        ],
+                      ),
+                    ),
+            ),
+          ),
+
+          // "Preview" label top-left
+          const Positioned(
+            top: 8,
+            left: 10,
+            child: Text(
+              'PREVIEW',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget get _placeholder => Container(
+        height: 180,
+        color: AppColors.primaryDark.withValues(alpha: 0.08),
+        child: const Center(
+          child: Icon(Icons.photo_outlined, size: 60, color: Color(0x1A2E7D32)),
+        ),
+      );
 }
