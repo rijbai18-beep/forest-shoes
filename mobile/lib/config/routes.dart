@@ -155,7 +155,7 @@ GoRouter createRouter(BuildContext context) {
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
-      body: Center(child: Text('Page not found: ${state.error}')),
+      body: const Center(child: Text('Page not found')),
     ),
   );
 }

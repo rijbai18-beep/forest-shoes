@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // ignore: use_build_context_synchronously
               Navigator.pop(ctx);
               messenger.showSnackBar(
-                const SnackBar(content: Text('Reset email sent.')),
+                const SnackBar(content: Text('Password reset email sent. Please check your inbox.')),
               );
             },
             child: const Text('Send'),

@@ -178,12 +178,13 @@ class _ShopScreenState extends State<ShopScreen> {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.error_outline_rounded,
+                                      const Icon(Icons.wifi_off_rounded,
                                           size: 48, color: AppColors.error),
                                       const SizedBox(height: 12),
-                                      Text(products.error!,
+                                      const Text(
+                                          'We couldn\'t load products.\nPlease check your connection and try again.',
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                               color: AppColors.textSecondary,
                                               fontSize: 13)),
                                       const SizedBox(height: 16),
@@ -191,7 +192,7 @@ class _ShopScreenState extends State<ShopScreen> {
                                         onPressed: () => context
                                             .read<ProductProvider>()
                                             .loadProducts(refresh: true),
-                                        child: const Text('Retry'),
+                                        child: const Text('Try Again'),
                                       ),
                                     ],
                                   ),

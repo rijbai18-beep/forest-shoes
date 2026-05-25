@@ -1037,7 +1037,7 @@ class _ReviewsSection extends StatelessWidget {
     final auth = context.read<AuthProvider>();
     if (!auth.isLoggedIn) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please log in to write a review.')));
+          const SnackBar(content: Text('Please sign in to write a review.')));
       return;
     }
     double rating = 5.0;

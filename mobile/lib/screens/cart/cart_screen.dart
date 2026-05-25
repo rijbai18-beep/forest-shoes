@@ -30,10 +30,12 @@ class _CartScreenState extends State<CartScreen> {
     setState(() => _applyingCoupon = true);
     try {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Coupon validation — connect Firebase Functions')),
+        const SnackBar(content: Text('This promo code is not valid. Please check the code and try again.')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not apply promo code. Please try again.')),
+      );
     } finally {
       setState(() => _applyingCoupon = false);
     }

@@ -64,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Photo upload failed: $e')),
+          const SnackBar(content: Text('Could not upload photo. Please try again.')),
         );
       }
       return null;
@@ -170,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: 'Full Name',
                       prefixIcon: Icons.person_outline,
                       validator: (v) =>
-                          v?.isEmpty == true ? 'Required' : null,
+                          v?.isEmpty == true ? 'Please enter your name' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -223,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 messenger.showSnackBar(SnackBar(
                   content: Text(success
                       ? 'Profile updated!'
-                      : auth.errorMessage ?? 'Error'),
+                      : auth.errorMessage ?? 'Could not update profile. Please try again.'),
                 ));
               },
             ),

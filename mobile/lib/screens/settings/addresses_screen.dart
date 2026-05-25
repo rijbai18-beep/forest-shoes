@@ -369,7 +369,7 @@ class _AddressSheetState extends State<_AddressSheet> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save: $e')),
+        const SnackBar(content: Text('Could not save address. Please try again.')),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -415,7 +415,7 @@ class _AddressSheetState extends State<_AddressSheet> {
                 label: 'Full Name',
                 hint: 'John Doe',
                 prefixIcon: Icons.person_outline,
-                validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                validator: (v) => v?.isEmpty == true ? 'Please enter a name' : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -424,7 +424,7 @@ class _AddressSheetState extends State<_AddressSheet> {
                 hint: '+230 5XXX XXXX',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_outlined,
-                validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                validator: (v) => v?.isEmpty == true ? 'Please enter a phone number' : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -432,7 +432,7 @@ class _AddressSheetState extends State<_AddressSheet> {
                 label: 'Address Line 1',
                 hint: '123 Main Street',
                 prefixIcon: Icons.home_outlined,
-                validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                validator: (v) => v?.isEmpty == true ? 'Please enter your street address' : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -450,7 +450,7 @@ class _AddressSheetState extends State<_AddressSheet> {
                       label: 'City',
                       hint: 'Port Louis',
                       validator: (v) =>
-                          v?.isEmpty == true ? 'Required' : null,
+                          v?.isEmpty == true ? 'Please enter a city' : null,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -461,7 +461,7 @@ class _AddressSheetState extends State<_AddressSheet> {
                       hint: '00000',
                       keyboardType: TextInputType.number,
                       validator: (v) =>
-                          v?.isEmpty == true ? 'Required' : null,
+                          v?.isEmpty == true ? 'Please enter a postcode' : null,
                     ),
                   ),
                 ],

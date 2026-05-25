@@ -131,9 +131,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _showOrderSuccess(orderId);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error placing order: $e')),
-      );
+      // Stock-validation exceptions carry user-readable messages; strip the
+      // Dart "Exception: " prefix before showing them. All other failures get
+      // a generic friendly message.
+      final raw = e.toString();
+      final msg = raw.startsWith('Exception: ')
+          ? raw.replaceFirst('Exception: ', '')
+          : 'We could not place your order. Please try again.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       setState(() => _placingOrder = false);
     }
@@ -215,7 +220,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         hint: 'John Doe',
                         prefixIcon: Icons.person_outline,
                         validator: (v) =>
-                            v?.isEmpty == true ? 'Required' : null,
+                            v?.isEmpty == true ? 'Please enter your name' : null,
                       ),
                       const SizedBox(height: 12),
                       CustomTextField(
@@ -225,7 +230,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         keyboardType: TextInputType.phone,
                         prefixIcon: Icons.phone_outlined,
                         validator: (v) =>
-                            v?.isEmpty == true ? 'Required' : null,
+                            v?.isEmpty == true ? 'Please enter a phone number' : null,
                       ),
                       const SizedBox(height: 12),
                       CustomTextField(
@@ -234,7 +239,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         hint: '123 Main Street',
                         prefixIcon: Icons.home_outlined,
                         validator: (v) =>
-                            v?.isEmpty == true ? 'Required' : null,
+                            v?.isEmpty == true ? 'Please enter your street address' : null,
                       ),
                       const SizedBox(height: 12),
                       CustomTextField(
@@ -252,7 +257,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               label: 'City',
                               hint: 'Port Louis',
                               validator: (v) =>
-                                  v?.isEmpty == true ? 'Required' : null,
+                                  v?.isEmpty == true ? 'Please enter a city' : null,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -263,7 +268,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               hint: '00000',
                               keyboardType: TextInputType.number,
                               validator: (v) =>
-                                  v?.isEmpty == true ? 'Required' : null,
+                                  v?.isEmpty == true ? 'Please enter a postcode' : null,
                             ),
                           ),
                         ],
