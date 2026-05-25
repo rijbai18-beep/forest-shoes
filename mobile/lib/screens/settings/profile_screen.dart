@@ -53,10 +53,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_pickedImage == null) return null;
     setState(() => _uploadingPhoto = true);
     try {
+      // Path must match Storage rules: users/{uid}/profile/{file}
       final ref = FirebaseStorage.instance
-          .ref('profile_photos/$uid.jpg');
+          .ref('users/$uid/profile/avatar.jpg');
       await ref.putFile(_pickedImage!);
       return await ref.getDownloadURL();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Photo upload failed: $e')),
+        );
+      }
+      return null;
     } finally {
       if (mounted) setState(() => _uploadingPhoto = false);
     }
