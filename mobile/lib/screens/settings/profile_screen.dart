@@ -21,6 +21,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
   File? _pickedImage;
+  // Holds the Storage URL optimistically after a successful save so the photo
+  // shows immediately without waiting for the Firestore stream to round-trip.
+  String? _localPhotoUrl;
   bool _uploadingPhoto = false;
 
   @override
@@ -74,7 +77,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
-    final photoUrl = _pickedImage != null ? null : user?.photoUrl;
+    // Priority: local file > optimistic URL from last save > Firestore URL
+    final photoUrl = _pickedImage != null
+        ? null
+        : (_localPhotoUrl ?? user?.photoUrl);
     final initials =
         (user?.name.isNotEmpty == true) ? user!.name[0].toUpperCase() : 'U';
 
@@ -208,8 +214,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   photoUrl: newPhotoUrl,
                 );
                 if (!mounted) return;
-                if (success && newPhotoUrl != null) {
-                  setState(() => _pickedImage = null);
+                if (success) {
+                  setState(() {
+                    _pickedImage = null;
+                    if (newPhotoUrl != null) _localPhotoUrl = newPhotoUrl;
+                  });
                 }
                 messenger.showSnackBar(SnackBar(
                   content: Text(success

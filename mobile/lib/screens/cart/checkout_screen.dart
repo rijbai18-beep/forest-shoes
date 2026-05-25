@@ -76,12 +76,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  double _computeDeliveryFee(double subtotal) {
-    final baseFee = _selectedDelivery?.fee ?? AppConstants.defaultDeliveryFee;
-    final threshold =
-        (_settings['freeDeliveryThreshold'] ?? AppConstants.freeDeliveryThreshold)
-            .toDouble();
-    return subtotal >= threshold ? 0.0 : baseFee;
+  double _computeDeliveryFee() {
+    // Each delivery type already carries its own fee configured by the admin.
+    // Returning that fee directly is the correct behaviour — free-delivery
+    // promotions should be expressed as a delivery option with fee = 0 in the
+    // admin panel, not by silently zeroing out the selected fee here.
+    return _selectedDelivery?.fee ?? 0.0;
   }
 
   Future<void> _placeOrder(double deliveryFee) async {
@@ -192,7 +192,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
-    final deliveryFee = _computeDeliveryFee(cart.subtotal);
+    final deliveryFee = _computeDeliveryFee();
 
     return Scaffold(
       backgroundColor: AppColors.background,
