@@ -76,17 +76,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  double get _deliveryFee {
-    final cart = context.read<CartProvider>();
-    final baseFee =
-        _selectedDelivery?.fee ?? AppConstants.defaultDeliveryFee;
+  double _computeDeliveryFee(double subtotal) {
+    final baseFee = _selectedDelivery?.fee ?? AppConstants.defaultDeliveryFee;
     final threshold =
         (_settings['freeDeliveryThreshold'] ?? AppConstants.freeDeliveryThreshold)
             .toDouble();
-    return cart.subtotal >= threshold ? 0.0 : baseFee;
+    return subtotal >= threshold ? 0.0 : baseFee;
   }
 
-  Future<void> _placeOrder() async {
+  Future<void> _placeOrder(double deliveryFee) async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedPayment == null || _selectedDelivery == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,10 +112,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         userId: auth.user!.uid,
         items: cart.items.toList(),
         subtotal: cart.subtotal,
-        deliveryFee: _deliveryFee,
+        deliveryFee: deliveryFee,
         engravingFee: cart.engravingTotal,
         couponDiscount: cart.couponDiscount,
-        total: cart.calculateTotal(_deliveryFee),
+        total: cart.calculateTotal(deliveryFee),
         paymentType: _selectedPayment!.name,
         paymentTypeId: _selectedPayment!.id,
         deliveryType: _selectedDelivery!.name,
@@ -194,6 +192,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
+    final deliveryFee = _computeDeliveryFee(cart.subtotal);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -388,9 +387,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             isGreen: true),
                       _OrderRow(
                         'Delivery',
-                        _deliveryFee == 0
+                        deliveryFee == 0
                             ? 'Free'
-                            : 'Rs ${_deliveryFee.toStringAsFixed(0)}',
+                            : 'Rs ${deliveryFee.toStringAsFixed(0)}',
                       ),
                       const Divider(),
                       Row(
@@ -401,7 +400,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   fontSize: 16)),
                           const Spacer(),
                           Text(
-                            'Rs ${cart.calculateTotal(_deliveryFee).toStringAsFixed(0)}',
+                            'Rs ${cart.calculateTotal(deliveryFee).toStringAsFixed(0)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 20,
@@ -417,7 +416,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   CustomButton(
                     text: 'Place Order',
-                    onPressed: _placeOrder,
+                    onPressed: () => _placeOrder(deliveryFee),
                     isLoading: _placingOrder,
                     icon: Icons.check_circle_outline,
                   ),

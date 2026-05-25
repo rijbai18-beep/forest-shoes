@@ -6,6 +6,7 @@ import 'package:overlay_support/overlay_support.dart';
 
 import 'config/theme.dart';
 import 'config/routes.dart';
+import 'package:go_router/go_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/branding_provider.dart';
 import 'providers/cart_provider.dart';
@@ -48,18 +49,47 @@ class ForestShoesApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
       ],
-      child: Builder(
-        builder: (context) {
-          final router = createRouter(context);
-          return OverlaySupport.global(
-            child: MaterialApp.router(
-              title: 'Forest Shoes',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light,
-              routerConfig: router,
-            ),
-          );
-        },
+      child: _AppRoot(),
+    );
+  }
+}
+
+class _AppRoot extends StatefulWidget {
+  @override
+  State<_AppRoot> createState() => _AppRootState();
+}
+
+class _AppRootState extends State<_AppRoot> {
+  late final GoRouter _router;
+  String? _lastWishlistUid;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createRouter(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final products = context.read<ProductProvider>();
+
+    // Start or clear wishlist stream whenever auth state changes.
+    final uid = auth.user?.uid;
+    if (uid != null && uid != _lastWishlistUid) {
+      _lastWishlistUid = uid;
+      products.listenToWishlist(uid);
+    } else if (uid == null && _lastWishlistUid != null) {
+      _lastWishlistUid = null;
+      products.clearWishlist();
+    }
+
+    return OverlaySupport.global(
+      child: MaterialApp.router(
+        title: 'Forest Shoes',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        routerConfig: _router,
       ),
     );
   }

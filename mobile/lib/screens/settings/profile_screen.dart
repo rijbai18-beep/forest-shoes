@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
@@ -17,6 +20,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _phoneCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  File? _pickedImage;
+  bool _uploadingPhoto = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,9 +38,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+    setState(() => _pickedImage = File(picked.path));
+  }
+
+  Future<String?> _uploadPhoto(String uid) async {
+    if (_pickedImage == null) return null;
+    setState(() => _uploadingPhoto = true);
+    try {
+      final ref = FirebaseStorage.instance
+          .ref('profile_photos/$uid.jpg');
+      await ref.putFile(_pickedImage!);
+      return await ref.getDownloadURL();
+    } finally {
+      if (mounted) setState(() => _uploadingPhoto = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    final photoUrl = _pickedImage != null ? null : user?.photoUrl;
+    final initials =
+        (user?.name.isNotEmpty == true) ? user!.name[0].toUpperCase() : 'U';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Edit Profile')),
@@ -43,42 +78,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Avatar
+            // ── Avatar ──────────────────────────────────────────────────────
             Center(
               child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                    child: Text(
-                      auth.user?.name[0].toUpperCase() ?? 'U',
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor:
+                          AppColors.primary.withValues(alpha: 0.2),
+                      backgroundImage: _pickedImage != null
+                          ? FileImage(_pickedImage!) as ImageProvider
+                          : (photoUrl != null
+                              ? NetworkImage(photoUrl)
+                              : null),
+                      child: (_pickedImage == null && photoUrl == null)
+                          ? Text(
+                              initials,
+                              style: const TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
+                            )
+                          : null,
                     ),
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: _uploadingPhoto
+                            ? const Padding(
+                                padding: EdgeInsets.all(7),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.camera_alt_rounded,
+                                color: Colors.white, size: 16),
                       ),
-                      child: const Icon(Icons.camera_alt_rounded,
-                          color: Colors.white, size: 16),
                     ),
                   ),
                 ],
               ),
             ),
+            if (_pickedImage != null) ...[
+              const SizedBox(height: 8),
+              const Center(
+                child: Text(
+                  'Photo selected — save to apply',
+                  style: TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ),
+            ],
             const SizedBox(height: 32),
 
-            // User details
+            // ── User details card ────────────────────────────────────────────
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -88,7 +155,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       controller: _nameCtrl,
                       label: 'Full Name',
                       prefixIcon: Icons.person_outline,
-                      validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                      validator: (v) =>
+                          v?.isEmpty == true ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -103,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       leading: const Icon(Icons.email_outlined,
                           color: AppColors.primary),
                       title: const Text('Email'),
-                      subtitle: Text(auth.user?.email ?? ''),
+                      subtitle: Text(user?.email ?? ''),
                       trailing: const Icon(Icons.lock_outline,
                           color: AppColors.textHint, size: 16),
                     ),
@@ -115,18 +183,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             CustomButton(
               text: 'Save Changes',
-              isLoading: auth.isLoading,
+              isLoading: auth.isLoading || _uploadingPhoto,
               onPressed: () async {
                 if (!_formKey.currentState!.validate()) return;
                 final messenger = ScaffoldMessenger.of(context);
+
+                String? newPhotoUrl;
+                if (_pickedImage != null && user != null) {
+                  newPhotoUrl = await _uploadPhoto(user.uid);
+                }
+
+                if (!mounted) return;
                 final success = await auth.updateProfile(
                   name: _nameCtrl.text,
                   phone: _phoneCtrl.text.isEmpty ? null : _phoneCtrl.text,
+                  photoUrl: newPhotoUrl,
                 );
                 if (!mounted) return;
+                if (success && newPhotoUrl != null) {
+                  setState(() => _pickedImage = null);
+                }
                 messenger.showSnackBar(SnackBar(
-                  content: Text(
-                      success ? 'Profile updated!' : auth.errorMessage ?? 'Error'),
+                  content: Text(success
+                      ? 'Profile updated!'
+                      : auth.errorMessage ?? 'Error'),
                 ));
               },
             ),

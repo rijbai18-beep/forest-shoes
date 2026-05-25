@@ -25,29 +25,70 @@ class OrderService {
     String? couponId,
     bool isPostage = false,
   }) async {
+    // Pre-allocate the order ref so we can return its ID after the transaction.
     final orderRef = _db.collection(AppConstants.colOrders).doc();
-    final now = FieldValue.serverTimestamp();
 
-    await orderRef.set({
-      'userId': userId,
-      'items': items.map((e) => e.toMap()).toList(),
-      'subtotal': subtotal,
-      'deliveryFee': deliveryFee,
-      'engravingFee': engravingFee,
-      'couponDiscount': couponDiscount,
-      'total': total,
-      'paymentType': paymentType,
-      'paymentTypeId': paymentTypeId,
-      'deliveryType': deliveryType,
-      'deliveryTypeId': deliveryTypeId,
-      'status': AppConstants.statusNew,
-      'address': address.toMap(),
-      'note': note,
-      'couponCode': couponCode,
-      'couponId': couponId,
-      'isPostage': isPostage,
-      'createdAt': now,
-      'updatedAt': now,
+    // Aggregate total quantity needed per product (multiple cart lines can
+    // share the same productId when they differ only by size/color).
+    final Map<String, int> neededQty = {};
+    for (final item in items) {
+      neededQty[item.productId] = (neededQty[item.productId] ?? 0) + item.quantity;
+    }
+
+    final productRefs = neededQty.keys
+        .map((id) => _db.collection(AppConstants.colProducts).doc(id))
+        .toList();
+
+    await _db.runTransaction((tx) async {
+      // ── Phase 1: reads (must all come before any writes) ────────────────
+      final snaps = await Future.wait(productRefs.map((ref) => tx.get(ref)));
+
+      // ── Phase 2: stock validation ────────────────────────────────────────
+      for (int i = 0; i < productRefs.length; i++) {
+        final snap = snaps[i];
+        final productId = productRefs[i].id;
+        final data = snap.data();
+        final currentStock = (data?['stock'] as int?) ?? 0;
+        final required = neededQty[productId]!;
+
+        if (!snap.exists || currentStock < required) {
+          final name = data?['name'] as String? ?? productId;
+          throw Exception(
+            '"$name" is no longer available in the requested quantity. '
+            'Please update your cart and try again.',
+          );
+        }
+      }
+
+      // ── Phase 3: create order ────────────────────────────────────────────
+      final now = FieldValue.serverTimestamp();
+      tx.set(orderRef, {
+        'userId': userId,
+        'items': items.map((e) => e.toMap()).toList(),
+        'subtotal': subtotal,
+        'deliveryFee': deliveryFee,
+        'engravingFee': engravingFee,
+        'couponDiscount': couponDiscount,
+        'total': total,
+        'paymentType': paymentType,
+        'paymentTypeId': paymentTypeId,
+        'deliveryType': deliveryType,
+        'deliveryTypeId': deliveryTypeId,
+        'status': AppConstants.statusNew,
+        'address': address.toMap(),
+        'note': note,
+        'couponCode': couponCode,
+        'couponId': couponId,
+        'isPostage': isPostage,
+        'createdAt': now,
+        'updatedAt': now,
+      });
+
+      // ── Phase 4: decrement stock atomically ──────────────────────────────
+      for (int i = 0; i < productRefs.length; i++) {
+        final qty = neededQty[productRefs[i].id]!;
+        tx.update(productRefs[i], {'stock': FieldValue.increment(-qty)});
+      }
     });
 
     return orderRef.id;

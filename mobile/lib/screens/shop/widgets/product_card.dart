@@ -137,38 +137,43 @@ class ProductCard extends StatelessWidget {
                   ),
 
                 // Wishlist button — top-right
-                if (auth.isLoggedIn)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () => productProvider.toggleWishlist(
-                          auth.user!.uid, product.id),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          isWishlisted
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          size: 17,
-                          color: isWishlisted
-                              ? AppColors.sale
-                              : AppColors.textHint,
-                        ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (!auth.isLoggedIn) {
+                        context.push('/login');
+                        return;
+                      }
+                      productProvider.toggleWishlist(
+                          auth.user!.uid, product.id);
+                    },
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isWishlisted
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        size: 17,
+                        color: isWishlisted
+                            ? AppColors.sale
+                            : AppColors.textHint,
                       ),
                     ),
                   ),
+                ),
 
                 // Engravable badge
                 if (product.hasEngraving)

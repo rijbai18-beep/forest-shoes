@@ -112,6 +112,14 @@ class AuthService {
     });
   }
 
+  Future<void> setAddresses(
+      String uid, List<Map<String, dynamic>> addresses) async {
+    await _db
+        .collection(AppConstants.colUsers)
+        .doc(uid)
+        .update({'addresses': addresses});
+  }
+
   Future<void> updatePassword(String currentPassword, String newPassword) async {
     final user = _auth.currentUser!;
     final cred = EmailAuthProvider.credential(

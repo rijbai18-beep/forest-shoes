@@ -13,7 +13,7 @@ class SettingsScreen extends StatelessWidget {
     final topPad = MediaQuery.of(context).padding.top;
 
     // Green header height (safe area + title row + breathing room)
-    const double greenBodyHeight = 90.0;
+    const double greenBodyHeight = 120.0;
     // How far the user card bleeds below the green into gray
     const double cardOverhang = 44.0;
 
@@ -138,16 +138,7 @@ class SettingsScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.bookmark_border_rounded,
                       label: 'Saved Address',
-                      onTap: () => context.push('/profile'),
-                    ),
-                    const SizedBox(height: 10),
-                    _MenuItem(
-                      icon: Icons.credit_card_outlined,
-                      label: 'Payment Methods',
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Payment methods coming soon.')),
-                      ),
+                      onTap: () => context.push('/addresses'),
                     ),
                     const SizedBox(height: 10),
                   ],

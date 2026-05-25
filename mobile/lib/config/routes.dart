@@ -14,6 +14,7 @@ import '../screens/cart/cart_screen.dart';
 import '../screens/cart/checkout_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/settings/profile_screen.dart';
+import '../screens/settings/addresses_screen.dart';
 import '../screens/settings/order_history_screen.dart';
 import '../screens/settings/order_detail_screen.dart';
 import '../screens/settings/content_screen.dart';
@@ -33,6 +34,7 @@ class AppRoutes {
   static const checkout = '/checkout';
   static const settings = '/settings';
   static const profile = '/profile';
+  static const addresses = '/addresses';
   static const orderHistory = '/orders';
   static const orderDetail = '/orders/:id';
   static const content = '/content/:type';
@@ -45,6 +47,7 @@ class AppRoutes {
 const _authRequiredRoutes = {
   AppRoutes.checkout,
   AppRoutes.profile,
+  AppRoutes.addresses,
   AppRoutes.orderHistory,
   AppRoutes.wishlist,
   AppRoutes.support,
@@ -114,6 +117,10 @@ GoRouter createRouter(BuildContext context) {
       GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.addresses,
+        builder: (context, state) => const AddressesScreen(),
       ),
       GoRoute(
         path: AppRoutes.orderHistory,

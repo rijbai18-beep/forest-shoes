@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/product_model.dart';
@@ -11,6 +12,7 @@ class ProductProvider extends ChangeNotifier {
   List<ProductModel> _saleProducts = [];
   List<CategoryModel> _categories = [];
   List<String> _wishlistIds = [];
+  StreamSubscription<List<String>>? _wishlistSub;
   bool _isLoading = false;
   bool _hasMore = true;
   String? _error;
@@ -83,13 +85,27 @@ class ProductProvider extends ChangeNotifier {
   }
 
   void listenToWishlist(String userId) {
-    _service.wishlistStream(userId).listen((ids) {
+    _wishlistSub?.cancel();
+    _wishlistSub = _service.wishlistStream(userId).listen((ids) {
       _wishlistIds = ids;
       notifyListeners();
     });
   }
 
+  void clearWishlist() {
+    _wishlistSub?.cancel();
+    _wishlistSub = null;
+    _wishlistIds = [];
+    notifyListeners();
+  }
+
   Future<void> toggleWishlist(String userId, String productId) async {
     await _service.toggleWishlist(userId, productId);
+  }
+
+  @override
+  void dispose() {
+    _wishlistSub?.cancel();
+    super.dispose();
   }
 }

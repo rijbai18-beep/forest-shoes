@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
+import '../models/order_model.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 
@@ -110,18 +111,33 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateProfile({String? name, String? phone}) async {
+  Future<bool> updateProfile(
+      {String? name, String? phone, String? photoUrl}) async {
     if (_user == null) return false;
     _setLoading(true);
     try {
       await _authService.updateProfile(
-          uid: _user!.uid, name: name, phone: phone);
+          uid: _user!.uid, name: name, phone: phone, photoUrl: photoUrl);
       return true;
     } catch (e) {
       _errorMessage = e.toString();
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  Future<bool> updateAddresses(List<AddressModel> addresses) async {
+    if (_user == null) return false;
+    try {
+      await _authService.setAddresses(
+        _user!.uid,
+        addresses.map((a) => a.toMap()).toList(),
+      );
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
     }
   }
 
