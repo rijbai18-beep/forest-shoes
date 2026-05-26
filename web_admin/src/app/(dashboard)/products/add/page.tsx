@@ -58,6 +58,7 @@ export default function AddProductPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [customColorInput, setCustomColorInput] = useState('')
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [perSizeStock, setPerSizeStock] = useState(false)
@@ -143,6 +144,16 @@ export default function AddProductPage() {
       ...f,
       colors: f.colors.includes(color) ? f.colors.filter(c => c !== color) : [...f.colors, color],
     }))
+  }
+
+  function addCustomColor() {
+    const name = customColorInput.trim()
+    if (!name) return
+    const normalized = name.charAt(0).toUpperCase() + name.slice(1)
+    if (!form.colors.includes(normalized)) {
+      setForm(f => ({ ...f, colors: [...f.colors, normalized] }))
+    }
+    setCustomColorInput('')
   }
 
   function addCustomField() {
@@ -437,6 +448,40 @@ export default function AddProductPage() {
                       </button>
                     )
                   })}
+                  {/* Custom colors not in preset */}
+                  {form.colors.filter(c => !COLORS.includes(c)).map(color => (
+                    <span
+                      key={color}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm rounded-xl border-2 border-[#6c63ff] bg-[#6c63ff] text-white font-medium"
+                    >
+                      {color}
+                      <button
+                        type="button"
+                        onClick={() => toggleColor(color)}
+                        className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X size={11} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                {/* Custom color input */}
+                <div className="flex gap-2 mt-3">
+                  <input
+                    type="text"
+                    value={customColorInput}
+                    onChange={e => setCustomColorInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomColor() } }}
+                    placeholder="Add custom color…"
+                    className="input-field flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomColor}
+                    className="btn-outline px-4 flex-shrink-0"
+                  >
+                    <Plus size={14} /> Add
+                  </button>
                 </div>
               </div>
 

@@ -71,7 +71,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           const SnackBar(content: Text('Please select a size.')));
       return;
     }
-    if (_selectedColor == null) {
+    if (_product!.colors.isNotEmpty && _selectedColor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please select a color.')));
       return;
@@ -82,7 +82,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           imageUrl: _product!.images.isNotEmpty ? _product!.images.first : '',
           price: _product!.effectivePrice,
           size: _selectedSize,
-          color: _selectedColor!,
+          color: _selectedColor ?? '',
           quantity: _quantity,
           hasEngraving: _engravingEnabled && _engravingText != null,
           engravingText: _engravingEnabled ? _engravingText : null,
