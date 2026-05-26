@@ -12,10 +12,38 @@ import toast from 'react-hot-toast'
 import {
   X, Upload, Plus, Trash2, ImageIcon, Layers, Tag, DollarSign,
   Package, Ruler, Palette, Pen, Settings2, Star, Eye, ArrowLeft,
+  Shirt, Baby,
 } from 'lucide-react'
 import Link from 'next/link'
 
-const SIZES = ['36','37','38','39','40','41','42','43','44','45','46']
+type SizePresetKey = 'adult-shoes' | 'kids-shoes' | 'clothing' | 'none'
+
+const SIZE_PRESETS: Record<SizePresetKey, { label: string; shortLabel: string; sizes: string[] }> = {
+  'adult-shoes': {
+    label: 'Adult Shoes', shortLabel: 'Adult',
+    sizes: ['36','37','38','39','40','41','42','43','44','45','46'],
+  },
+  'kids-shoes': {
+    label: 'Kids Shoes', shortLabel: 'Kids',
+    sizes: ['18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35'],
+  },
+  'clothing': {
+    label: 'Clothing', shortLabel: 'Clothes',
+    sizes: ['XS','S','M','L','XL','XXL','3XL','4XL'],
+  },
+  'none': {
+    label: 'No Size', shortLabel: 'None',
+    sizes: [],
+  },
+}
+
+function detectSizeType(sizes: string[]): SizePresetKey {
+  if (!sizes?.length) return 'adult-shoes'
+  if (sizes.some(s => SIZE_PRESETS.clothing.sizes.includes(s))) return 'clothing'
+  if (sizes.some(s => parseInt(s) <= 35)) return 'kids-shoes'
+  return 'adult-shoes'
+}
+
 const COLORS = ['Black','White','Brown','Grey','Navy','Green','Red','Blue','Tan','Beige']
 const GENDERS = ['men','women','kids','unisex']
 
@@ -39,6 +67,7 @@ export default function AddProductPage() {
     name: '', description: '', category: '', gender: '',
     price: '', salePrice: '', stock: '',
     colors: [] as string[], sizes: [] as string[],
+    sizeType: 'adult-shoes' as SizePresetKey,
     hasEngraving: false, engravingFee: '100', engravingMaxChars: '10',
     tags: '', isActive: true, isFeatured: false,
     customFields: {} as Record<string, string>,
@@ -58,11 +87,13 @@ export default function AddProductPage() {
     const snap = await getDoc(doc(db, 'products', id))
     if (!snap.exists()) return
     const d = snap.data()
+    const loadedSizes: string[] = d.sizes ?? []
     setForm({
       name: d.name ?? '', description: d.description ?? '',
       category: d.category ?? '', gender: d.gender ?? '',
       price: d.price?.toString() ?? '', salePrice: d.salePrice?.toString() ?? '',
-      stock: d.stock?.toString() ?? '', colors: d.colors ?? [], sizes: d.sizes ?? [],
+      stock: d.stock?.toString() ?? '', colors: d.colors ?? [], sizes: loadedSizes,
+      sizeType: (d.sizeType as SizePresetKey) ?? detectSizeType(loadedSizes),
       hasEngraving: d.hasEngraving ?? false, engravingFee: d.engravingFee?.toString() ?? '100',
       engravingMaxChars: d.engravingMaxChars?.toString() ?? '10',
       tags: d.tags?.join(', ') ?? '', isActive: d.isActive ?? true,
@@ -145,6 +176,7 @@ export default function AddProductPage() {
         stock: totalStock,
         colors: form.colors,
         sizes: form.sizes,
+        sizeType: form.sizeType,
         hasEngraving: form.hasEngraving,
         engravingFee: parseFloat(form.engravingFee) || 100,
         engravingMaxChars: parseInt(form.engravingMaxChars) || 10,
@@ -263,72 +295,119 @@ export default function AddProductPage() {
                     </span>
                     Sizes
                   </p>
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <span className="text-xs text-gray-500 font-medium">Per-size stock</span>
-                    <button
-                      type="button"
-                      onClick={() => setPerSizeStock(v => !v)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${perSizeStock ? 'bg-[#6c63ff]' : 'bg-gray-200'}`}
-                    >
-                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${perSizeStock ? 'translate-x-5' : ''}`} />
-                    </button>
-                  </label>
-                </div>
-
-                <p className="text-xs text-gray-400 -mt-1">Leave unselected for products that don't require size (e.g. accessories, bags).</p>
-
-                {/* Size grid */}
-                <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
-                  {SIZES.map(size => {
-                    const selected = form.sizes.includes(size)
-                    return (
+                  {form.sizeType !== 'none' && (
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <span className="text-xs text-gray-500 font-medium">Per-size stock</span>
                       <button
-                        key={size}
                         type="button"
-                        onClick={() => toggleSize(size)}
-                        className={`flex flex-col items-center justify-center h-12 rounded-xl border-2 text-sm font-semibold transition-all duration-150 ${
-                          selected
-                            ? 'border-[#6c63ff] bg-[#6c63ff] text-white shadow-sm shadow-green-900/20 scale-105'
-                            : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                        }`}
+                        onClick={() => setPerSizeStock(v => !v)}
+                        className={`relative w-10 h-5 rounded-full transition-colors ${perSizeStock ? 'bg-[#6c63ff]' : 'bg-gray-200'}`}
                       >
-                        {size}
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${perSizeStock ? 'translate-x-5' : ''}`} />
                       </button>
-                    )
-                  })}
+                    </label>
+                  )}
                 </div>
 
-                {/* Per-size stock inputs */}
-                {perSizeStock && form.sizes.length > 0 && (
-                  <div className="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 mb-3">Stock per size</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                      {form.sizes.sort((a, b) => parseInt(a) - parseInt(b)).map(size => (
-                        <div key={size} className="flex flex-col gap-1">
-                          <label className="text-xs font-semibold text-gray-600 text-center">EU {size}</label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={sizeStock[size] ?? ''}
-                            onChange={e => setSizeStock(prev => ({ ...prev, [size]: parseInt(e.target.value) || 0 }))}
-                            placeholder="0"
-                            className="input-field text-center text-sm font-semibold px-2"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-3">
-                      Total stock: <span className="font-semibold text-gray-700">
-                        {Object.values(sizeStock).reduce((a, b) => a + (b || 0), 0)} units
-                      </span>
-                    </p>
-                  </div>
-                )}
+                {/* Size type selector */}
+                <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
+                  {(Object.entries(SIZE_PRESETS) as [SizePresetKey, typeof SIZE_PRESETS[SizePresetKey]][]).map(([key, preset]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        if (form.sizeType === key) return
+                        setForm(prev => ({ ...prev, sizeType: key, sizes: [] }))
+                        setSizeStock({})
+                      }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+                        form.sizeType === key
+                          ? 'bg-white text-brand-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {key === 'adult-shoes' && <Ruler size={11} />}
+                      {key === 'kids-shoes'  && <Baby size={11} />}
+                      {key === 'clothing'    && <Shirt size={11} />}
+                      {preset.shortLabel}
+                    </button>
+                  ))}
+                </div>
 
-                {perSizeStock && form.sizes.length === 0 && (
-                  <p className="text-xs text-amber-600 bg-amber-50 rounded-xl px-4 py-3 border border-amber-100">
-                    Select sizes above to set stock per size.
+                {form.sizeType === 'none' ? (
+                  <p className="text-xs text-gray-400 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                    No size selection — customers won't be asked to choose a size (e.g. accessories, bags).
                   </p>
+                ) : (
+                  <>
+                    {/* Size grid */}
+                    <div className={`grid gap-2 ${
+                      form.sizeType === 'clothing'
+                        ? 'grid-cols-4 sm:grid-cols-8'
+                        : form.sizeType === 'kids-shoes'
+                          ? 'grid-cols-6 sm:grid-cols-9'
+                          : 'grid-cols-6 sm:grid-cols-8'
+                    }`}>
+                      {SIZE_PRESETS[form.sizeType].sizes.map(size => {
+                        const selected = form.sizes.includes(size)
+                        return (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => toggleSize(size)}
+                            className={`flex items-center justify-center h-11 rounded-xl border-2 text-sm font-semibold transition-all duration-150 ${
+                              selected
+                                ? 'border-[#6c63ff] bg-[#6c63ff] text-white shadow-sm scale-105'
+                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800'
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Per-size stock inputs */}
+                    {perSizeStock && form.sizes.length > 0 && (
+                      <div className="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <p className="text-xs font-semibold text-gray-500 mb-3">Stock per size</p>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                          {form.sizes
+                            .slice()
+                            .sort((a, b) => {
+                              const order = SIZE_PRESETS[form.sizeType].sizes
+                              return order.indexOf(a) - order.indexOf(b)
+                            })
+                            .map(size => (
+                              <div key={size} className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-600 text-center">
+                                  {form.sizeType === 'clothing' ? size : `EU ${size}`}
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={sizeStock[size] ?? ''}
+                                  onChange={e => setSizeStock(prev => ({ ...prev, [size]: parseInt(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  className="input-field text-center text-sm font-semibold px-2"
+                                />
+                              </div>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-3">
+                          Total stock: <span className="font-semibold text-gray-700">
+                            {Object.values(sizeStock).reduce((a, b) => a + (b || 0), 0)} units
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
+                    {perSizeStock && form.sizes.length === 0 && (
+                      <p className="text-xs text-amber-600 bg-amber-50 rounded-xl px-4 py-3 border border-amber-100">
+                        Select sizes above to set stock per size.
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
 
