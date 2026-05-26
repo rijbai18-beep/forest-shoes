@@ -304,6 +304,36 @@ exports.setAdminRole = functions.https.onCall(async (data, context) => {
   return { success: true };
 });
 
+// ─── Create a new admin user account ─────────────────────────────────────────
+exports.createAdminUser = functions.https.onCall(async (data, context) => {
+  if (!context.auth?.token?.admin) {
+    throw new functions.https.HttpsError("permission-denied", "Only admins can create admin accounts.");
+  }
+  const { email, password, name } = data;
+  if (!email || !password || !name) {
+    throw new functions.https.HttpsError("invalid-argument", "name, email, and password are required.");
+  }
+  if (password.length < 8) {
+    throw new functions.https.HttpsError("invalid-argument", "Password must be at least 8 characters.");
+  }
+
+  const userRecord = await admin.auth().createUser({ email, password, displayName: name });
+  await admin.auth().setCustomUserClaims(userRecord.uid, { admin: true });
+  await db.collection("users").doc(userRecord.uid).set({
+    email,
+    name,
+    phone: null,
+    photoUrl: null,
+    addresses: [],
+    isActive: true,
+    isAdmin: true,
+    fcmTokens: [],
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { uid: userRecord.uid, success: true };
+});
+
 // ─── Scheduled FCM token cleanup (daily) ─────────────────────────────────────
 exports.cleanupFcmTokens = functions.pubsub
   .schedule("every 24 hours")
