@@ -29,6 +29,14 @@ class _ShopScreenState extends State<ShopScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadInitial());
   }
 
+  @override
+  void didUpdateWidget(ShopScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.gender != widget.gender || oldWidget.categoryId != widget.categoryId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadInitial());
+    }
+  }
+
   void _loadInitial() {
     final filter = ProductFilter(
       category: widget.categoryId,
