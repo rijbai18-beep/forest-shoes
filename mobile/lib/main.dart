@@ -35,7 +35,7 @@ void main() async {
   };
 
   // Capture uncaught async/platform errors
-  PlatformDispatcher.instance.onError = (error, stack) {
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
     AuditService.instance.logError(error, stack, context: 'platform_error');
     return true;
   };
