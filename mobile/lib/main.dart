@@ -63,10 +63,14 @@ class _AppRoot extends StatefulWidget {
 class _AppRootState extends State<_AppRoot> {
   late final GoRouter _router;
   String? _lastWishlistUid;
+
   Timer? _sessionTimer;
+  Timer? _warnTimer;
   bool _wasLoggedIn = false;
+  bool _warningShown = false;
 
   static const _sessionTimeout = Duration(minutes: 5);
+  static const _warnOffset = Duration(minutes: 1);
 
   @override
   void initState() {
@@ -77,23 +81,59 @@ class _AppRootState extends State<_AppRoot> {
   @override
   void dispose() {
     _sessionTimer?.cancel();
+    _warnTimer?.cancel();
     super.dispose();
   }
 
-  // Called on any pointer event while the user is logged in.
   void _onUserActivity() {
     if (!context.read<AuthProvider>().isLoggedIn) return;
+    _resetTimers();
+  }
+
+  void _resetTimers() {
     _sessionTimer?.cancel();
+    _warnTimer?.cancel();
+    _warningShown = false;
+    _warnTimer = Timer(_sessionTimeout - _warnOffset, _onSessionWarning);
     _sessionTimer = Timer(_sessionTimeout, _onSessionExpired);
+  }
+
+  void _onSessionWarning() {
+    if (!mounted) return;
+    _warningShown = true;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Session Expiring'),
+        content: const Text(
+          'You will be automatically logged out in 1 minute due to inactivity.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _warningShown = false;
+              _resetTimers();
+            },
+            child: const Text('Stay Logged In'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _onSessionExpired() async {
     if (!mounted) return;
     final auth = context.read<AuthProvider>();
     if (!auth.isLoggedIn) return;
+    if (_warningShown) {
+      _warningShown = false;
+      Navigator.of(context, rootNavigator: true).maybePop();
+    }
     await auth.signOut();
     if (!mounted) return;
-    _router.go('/login?timeout=true');
+    _router.go('/login');
   }
 
   @override
@@ -101,7 +141,6 @@ class _AppRootState extends State<_AppRoot> {
     final auth = context.watch<AuthProvider>();
     final products = context.read<ProductProvider>();
 
-    // Start or clear wishlist stream whenever auth state changes.
     final uid = auth.user?.uid;
     if (uid != null && uid != _lastWishlistUid) {
       _lastWishlistUid = uid;
@@ -111,19 +150,19 @@ class _AppRootState extends State<_AppRoot> {
       products.clearWishlist();
     }
 
-    // Start the inactivity timer when user logs in; cancel it on logout.
     if (auth.isLoggedIn && !_wasLoggedIn) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _onUserActivity());
     } else if (!auth.isLoggedIn && _wasLoggedIn) {
       _sessionTimer?.cancel();
+      _warnTimer?.cancel();
       _sessionTimer = null;
+      _warnTimer = null;
     }
     _wasLoggedIn = auth.isLoggedIn;
 
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _onUserActivity(),
-      onPointerMove: (_) => _onUserActivity(),
       child: OverlaySupport.global(
         child: MaterialApp.router(
           title: 'Forest Shoes',
