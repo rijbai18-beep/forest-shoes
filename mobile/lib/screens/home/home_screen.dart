@@ -238,48 +238,40 @@ class _HomeScreenState extends State<HomeScreen> {
                     _SectionHeader(
                       title: 'Shop by Style',
                       onSeeAll: () => context.go('/shop'),
-                      padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
+                      padding: const EdgeInsets.fromLTRB(0, 24, 0, 14),
                     ),
                     Row(
                       children: [
                         Expanded(
-                          child: _GenderCard(
-                            title: "Men's",
-                            icon: Icons.man_rounded,
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF1565C0), Color(0xFF0D47A1)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                          child: _StyleTile(
+                            label: "Men's",
+                            tag: 'MEN',
+                            tagline: 'Explore collection',
+                            color: const Color(0xFF0A1628),
+                            accentColor: const Color(0xFF60A5FA),
                             onTap: () => context.go('/shop?gender=men'),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: _GenderCard(
-                            title: "Women's",
-                            icon: Icons.woman_rounded,
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFC2185B), Color(0xFF880E4F)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                          child: _StyleTile(
+                            label: "Women's",
+                            tag: 'WOMEN',
+                            tagline: 'Explore collection',
+                            color: const Color(0xFF1A0A14),
+                            accentColor: const Color(0xFFF472B6),
                             onTap: () => context.go('/shop?gender=women'),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    _GenderCard(
-                      title: "Kids'",
-                      icon: Icons.child_care_rounded,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFE65100), Color(0xFFBF360C)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                    const SizedBox(height: 10),
+                    _StyleTileWide(
+                      label: "Kids'",
+                      tag: 'KIDS',
+                      color: const Color(0xFF0A1A10),
+                      accentColor: const Color(0xFF4ADE80),
                       onTap: () => context.go('/shop?gender=kids'),
-                      isWide: true,
                     ),
                   ],
                 ),
@@ -450,74 +442,221 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ── Gender Card ───────────────────────────────────────────────────────────────
+// ── Style Tiles ───────────────────────────────────────────────────────────────
 
-class _GenderCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final LinearGradient gradient;
+class _StyleTile extends StatelessWidget {
+  final String label;
+  final String tag;
+  final String tagline;
+  final Color color;
+  final Color accentColor;
   final VoidCallback onTap;
-  final bool isWide;
 
-  const _GenderCard({
-    required this.title,
-    required this.icon,
-    required this.gradient,
+  const _StyleTile({
+    required this.label,
+    required this.tag,
+    required this.tagline,
+    required this.color,
+    required this.accentColor,
     required this.onTap,
-    this.isWide = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: isWide ? 72 : 100,
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: gradient.colors.first.withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -10,
-              top: -10,
-              child: Icon(icon,
-                  size: 80, color: Colors.white.withValues(alpha: 0.12)),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                mainAxisAlignment: isWide
-                    ? MainAxisAlignment.center
-                    : MainAxisAlignment.start,
-                children: [
-                  Icon(icon, color: Colors.white, size: 28),
-                  const SizedBox(width: 10),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          height: 155,
+          color: color,
+          child: Stack(
+            children: [
+              // Large decorative circle
+              Positioned(
+                top: -35,
+                right: -35,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accentColor.withValues(alpha: 0.15),
                   ),
-                  if (isWide) ...[
-                    const Spacer(),
-                    const Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.white, size: 14),
-                  ],
-                ],
+                ),
               ),
-            ),
-          ],
+              // Smaller inner circle
+              Positioned(
+                top: 30,
+                right: 15,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accentColor.withValues(alpha: 0.10),
+                  ),
+                ),
+              ),
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.35),
+                          width: 0.7,
+                        ),
+                      ),
+                      child: Text(
+                        tag,
+                        style: TextStyle(
+                          color: accentColor,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          tagline,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.45),
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: accentColor,
+                          size: 12,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StyleTileWide extends StatelessWidget {
+  final String label;
+  final String tag;
+  final Color color;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _StyleTileWide({
+    required this.label,
+    required this.tag,
+    required this.color,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          height: 76,
+          color: color,
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accentColor.withValues(alpha: 0.15),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.35),
+                              width: 0.7,
+                            ),
+                          ),
+                          child: Text(
+                            tag,
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: accentColor,
+                      size: 18,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
