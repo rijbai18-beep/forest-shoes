@@ -120,7 +120,7 @@ export default function ProductsPage() {
                   <TableCell><Badge color={stockColor(p.stock)}>{p.stock} units</Badge></TableCell>
                   <TableCell><Badge color={p.isActive ? 'green' : 'gray'}>{p.isActive ? 'Active' : 'Hidden'}</Badge></TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1">
                       <button onClick={() => toggleFeatured(p)} title="Toggle featured"
                         className={"p-1.5 rounded-lg transition-colors " + (p.isFeatured ? 'text-amber-500 bg-amber-50' : 'hover:bg-gray-100 text-gray-400')}>
                         {p.isFeatured ? <StarSolid className="w-4 h-4" /> : <StarIcon className="w-4 h-4" />}

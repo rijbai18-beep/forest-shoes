@@ -204,7 +204,7 @@ export default function CouponsPage() {
                     </button>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEdit(coupon)}
                         className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"

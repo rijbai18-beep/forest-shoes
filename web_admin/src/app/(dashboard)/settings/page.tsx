@@ -244,7 +244,7 @@ export default function SettingsPage() {
                       onClick={() => handleRevoke(u)}
                       disabled={u.uid === currentUser?.uid || revokingUid === u.uid}
                       title={u.uid === currentUser?.uid ? "Can't revoke your own access" : 'Revoke admin access'}
-                      className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
                     >
                       {revokingUid === u.uid ? (
                         <div className="w-3.5 h-3.5 border border-red-400 border-t-transparent rounded-full animate-spin" />
