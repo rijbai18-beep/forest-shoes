@@ -37,6 +37,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Map<String, dynamic> _settings = {};
   bool _loadingOptions = true;
   bool _placingOrder = false;
+  bool _saveAddress = false;
 
   @override
   void initState() {
@@ -125,6 +126,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         couponCode: cart.appliedCouponCode,
       );
 
+      if (_saveAddress && auth.user!.addresses.isEmpty) {
+        await auth.updateAddresses([address]);
+      }
+
       cart.clearCart();
 
       if (!mounted) return;
@@ -197,7 +202,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
+    final auth = context.watch<AuthProvider>();
     final deliveryFee = _computeDeliveryFee();
+    final hasNoSavedAddress = auth.user != null && auth.user!.addresses.isEmpty;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -273,6 +280,70 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                         ],
                       ),
+                      if (hasNoSavedAddress) ...[
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: () => setState(() => _saveAddress = !_saveAddress),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _saveAddress
+                                  ? AppColors.primary.withValues(alpha: 0.06)
+                                  : const Color(0xFFF8F8F8),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _saveAddress
+                                    ? AppColors.primary.withValues(alpha: 0.35)
+                                    : const Color(0xFFE8E8E8),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: _saveAddress ? AppColors.primary : Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: _saveAddress ? AppColors.primary : const Color(0xFFCCCCCC),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: _saveAddress
+                                      ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Save this address',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      SizedBox(height: 1),
+                                      Text(
+                                        'Reuse it next time you check out',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
 
