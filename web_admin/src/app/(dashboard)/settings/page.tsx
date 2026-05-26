@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useBranding } from '@/contexts/BrandingContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from '@/lib/firebase'
 import { User } from '@/types'
 import { formatDate } from '@/lib/utils'
 import {
   Upload, AlertCircle, CheckCircle2, Plus, ShieldCheck,
-  ShieldOff, X, Eye, EyeOff,
+  ShieldOff, X, Eye, EyeOff, Banknote, Save, Mail,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -46,6 +46,64 @@ export default function SettingsPage() {
   }
 
   const displayUrl = preview ?? logoUrl ?? '/favicon.svg'
+
+  // ── Email Settings ────────────────────────────────────────────────────────
+  const [email, setEmail] = useState({ emailUser: '', emailPass: '' })
+  const [loadingEmail, setLoadingEmail] = useState(true)
+  const [savingEmail, setSavingEmail]   = useState(false)
+  const [showEmailPass, setShowEmailPass] = useState(false)
+
+  async function saveEmail(e: React.FormEvent) {
+    e.preventDefault()
+    setSavingEmail(true)
+    try {
+      await setDoc(doc(db, 'settings', 'global'), email, { merge: true })
+      toast.success('Email settings saved.')
+    } catch {
+      toast.error('Failed to save email settings.')
+    } finally {
+      setSavingEmail(false)
+    }
+  }
+
+  // ── Bank Transfer Details ─────────────────────────────────────────────────
+  const [bank, setBank] = useState({
+    bankName: '', bankAccountName: '', bankAccountNumber: '',
+    bankBranchCode: '', bankSwift: '', bankPaymentNote: '',
+  })
+  const [loadingBank, setLoadingBank] = useState(true)
+  const [savingBank, setSavingBank]   = useState(false)
+
+  // single read for all settings/global fields
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'global')).then(snap => {
+      if (snap.exists()) {
+        const d = snap.data()
+        setEmail({ emailUser: d.emailUser ?? '', emailPass: d.emailPass ?? '' })
+        setBank({
+          bankName:          d.bankName          ?? '',
+          bankAccountName:   d.bankAccountName   ?? '',
+          bankAccountNumber: d.bankAccountNumber ?? '',
+          bankBranchCode:    d.bankBranchCode    ?? '',
+          bankSwift:         d.bankSwift         ?? '',
+          bankPaymentNote:   d.bankPaymentNote   ?? '',
+        })
+      }
+    }).finally(() => { setLoadingEmail(false); setLoadingBank(false) })
+  }, [])
+
+  async function saveBank(e: React.FormEvent) {
+    e.preventDefault()
+    setSavingBank(true)
+    try {
+      await setDoc(doc(db, 'settings', 'global'), bank, { merge: true })
+      toast.success('Bank details saved.')
+    } catch {
+      toast.error('Failed to save bank details.')
+    } finally {
+      setSavingBank(false)
+    }
+  }
 
   // ── Admin Access ──────────────────────────────────────────────────────────
   const [admins, setAdmins]             = useState<User[]>([])
@@ -181,6 +239,128 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ── Email Settings ───────────────────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center gap-2.5 mb-1">
+            <Mail size={16} className="text-brand-600" />
+            <h2 className="text-sm font-semibold text-gray-800">Email Sender</h2>
+          </div>
+          <p className="text-xs text-gray-400 mb-5 leading-relaxed">
+            Gmail account used to send order confirmation emails. Use a Gmail App Password
+            (not your regular password) — generate one at{' '}
+            <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer"
+              className="text-brand-600 hover:underline">myaccount.google.com/apppasswords</a>.
+          </p>
+
+          {loadingEmail ? (
+            <div className="flex justify-center py-8">
+              <div className="w-5 h-5 border-[3px] border-brand-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <form onSubmit={saveEmail} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Gmail Address</label>
+                  <input type="email" value={email.emailUser}
+                    onChange={e => setEmail(v => ({ ...v, emailUser: e.target.value }))}
+                    className="input-field" placeholder="you@gmail.com" required />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">App Password</label>
+                  <div className="relative">
+                    <input type={showEmailPass ? 'text' : 'password'} value={email.emailPass}
+                      onChange={e => setEmail(v => ({ ...v, emailPass: e.target.value }))}
+                      className="input-field pr-11" placeholder="16-character app password" required />
+                    <button type="button" onClick={() => setShowEmailPass(s => !s)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      {showEmailPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                <AlertCircle size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                <p className="text-[11px] text-amber-700 leading-relaxed">
+                  Enable 2-Step Verification on the Gmail account first, then generate an App Password specifically for this app.
+                  Your regular Gmail password will not work.
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" disabled={savingEmail}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors disabled:opacity-60">
+                  {savingEmail
+                    ? <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    : <Save size={14} />}
+                  Save Settings
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* ── Payment & Bank Transfer ──────────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center gap-2.5 mb-1">
+            <Banknote size={16} className="text-brand-600" />
+            <h2 className="text-sm font-semibold text-gray-800">Payment &amp; Bank Transfer</h2>
+          </div>
+          <p className="text-xs text-gray-400 mb-5 leading-relaxed">
+            These details appear in order confirmation emails so customers know where to transfer payment.
+          </p>
+
+          {loadingBank ? (
+            <div className="flex justify-center py-8">
+              <div className="w-5 h-5 border-[3px] border-brand-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <form onSubmit={saveBank} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Bank Name</label>
+                  <input value={bank.bankName} onChange={e => setBank(b => ({ ...b, bankName: e.target.value }))}
+                    className="input-field" placeholder="e.g. MCB Bank" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Account Name</label>
+                  <input value={bank.bankAccountName} onChange={e => setBank(b => ({ ...b, bankAccountName: e.target.value }))}
+                    className="input-field" placeholder="e.g. Forest Shoes Ltd" required />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Account Number / IBAN</label>
+                  <input value={bank.bankAccountNumber} onChange={e => setBank(b => ({ ...b, bankAccountNumber: e.target.value }))}
+                    className="input-field" placeholder="e.g. 00123456789" required />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Branch Code <span className="text-gray-300 font-normal">(optional)</span></label>
+                  <input value={bank.bankBranchCode} onChange={e => setBank(b => ({ ...b, bankBranchCode: e.target.value }))}
+                    className="input-field" placeholder="e.g. 001" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">SWIFT / BIC <span className="text-gray-300 font-normal">(optional)</span></label>
+                  <input value={bank.bankSwift} onChange={e => setBank(b => ({ ...b, bankSwift: e.target.value }))}
+                    className="input-field" placeholder="e.g. MCBLMUMU" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Payment Note</label>
+                <textarea value={bank.bankPaymentNote}
+                  onChange={e => setBank(b => ({ ...b, bankPaymentNote: e.target.value }))}
+                  className="input-field resize-none" rows={2}
+                  placeholder="e.g. Please use your Order ID as the payment reference." />
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" disabled={savingBank}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors disabled:opacity-60">
+                  {savingBank
+                    ? <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    : <Save size={14} />}
+                  Save Details
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* ── Admin Access ─────────────────────────────────────────── */}
