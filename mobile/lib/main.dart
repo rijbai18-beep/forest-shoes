@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -62,11 +63,37 @@ class _AppRoot extends StatefulWidget {
 class _AppRootState extends State<_AppRoot> {
   late final GoRouter _router;
   String? _lastWishlistUid;
+  Timer? _sessionTimer;
+  bool _wasLoggedIn = false;
+
+  static const _sessionTimeout = Duration(minutes: 5);
 
   @override
   void initState() {
     super.initState();
     _router = createRouter(context);
+  }
+
+  @override
+  void dispose() {
+    _sessionTimer?.cancel();
+    super.dispose();
+  }
+
+  // Called on any pointer event while the user is logged in.
+  void _onUserActivity() {
+    if (!context.read<AuthProvider>().isLoggedIn) return;
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer(_sessionTimeout, _onSessionExpired);
+  }
+
+  Future<void> _onSessionExpired() async {
+    if (!mounted) return;
+    final auth = context.read<AuthProvider>();
+    if (!auth.isLoggedIn) return;
+    await auth.signOut();
+    if (!mounted) return;
+    _router.go('/login?timeout=true');
   }
 
   @override
@@ -84,12 +111,26 @@ class _AppRootState extends State<_AppRoot> {
       products.clearWishlist();
     }
 
-    return OverlaySupport.global(
-      child: MaterialApp.router(
-        title: 'Forest Shoes',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        routerConfig: _router,
+    // Start the inactivity timer when user logs in; cancel it on logout.
+    if (auth.isLoggedIn && !_wasLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onUserActivity());
+    } else if (!auth.isLoggedIn && _wasLoggedIn) {
+      _sessionTimer?.cancel();
+      _sessionTimer = null;
+    }
+    _wasLoggedIn = auth.isLoggedIn;
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _onUserActivity(),
+      onPointerMove: (_) => _onUserActivity(),
+      child: OverlaySupport.global(
+        child: MaterialApp.router(
+          title: 'Forest Shoes',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          routerConfig: _router,
+        ),
       ),
     );
   }

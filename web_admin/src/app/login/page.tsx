@@ -1,18 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useBranding } from '@/contexts/BrandingContext'
-import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck, Clock } from 'lucide-react'
 
 export default function LoginPage() {
   const { login } = useAuth()
   const { logoUrl } = useBranding()
+  const [timedOut, setTimedOut] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setTimedOut(params.get('timeout') === 'true')
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -72,6 +78,13 @@ export default function LoginPage() {
 
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Welcome back</h1>
           <p className="text-sm text-gray-400 mb-8">Sign in to your admin account</p>
+
+          {timedOut && (
+            <div className="mb-5 flex items-start gap-2.5 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+              <Clock size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-amber-700">You were signed out due to inactivity. Please sign in again.</p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl">
