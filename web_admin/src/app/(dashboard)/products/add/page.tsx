@@ -15,6 +15,7 @@ import {
   Shirt, Baby,
 } from 'lucide-react'
 import Link from 'next/link'
+import { logAction, logError } from '@/lib/audit'
 
 type SizePresetKey = 'adult-shoes' | 'kids-shoes' | 'clothing' | 'none'
 
@@ -202,13 +203,16 @@ export default function AddProductPage() {
 
       if (isEdit) {
         await updateDoc(doc(db, 'products', editId!), data)
+        logAction('product.updated', { productId: editId, name: form.name })
         toast.success('Product updated!')
       } else {
-        await addDoc(collection(db, 'products'), { ...data, rating: 0, reviewCount: 0, createdAt: serverTimestamp() })
+        const ref = await addDoc(collection(db, 'products'), { ...data, rating: 0, reviewCount: 0, createdAt: serverTimestamp() })
+        logAction('product.created', { productId: ref.id, name: form.name })
         toast.success('Product added!')
       }
       router.push('/products')
     } catch (err) {
+      logError(err, isEdit ? 'product.update_failed' : 'product.create_failed', { name: form.name })
       toast.error('Error saving product')
       console.error(err)
     } finally {

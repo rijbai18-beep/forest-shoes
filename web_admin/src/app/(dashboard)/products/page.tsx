@@ -12,6 +12,7 @@ import {
   Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell, Color,
 } from '@tremor/react'
 import { MagnifyingGlassIcon, PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, StarIcon } from '@heroicons/react/24/outline'
+import { logAction, logError } from '@/lib/audit'
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid'
 
 export default function ProductsPage() {
@@ -38,9 +39,15 @@ export default function ProductsPage() {
   }
   async function del(id: string) {
     if (!confirm('Delete this product?')) return
-    await deleteDoc(doc(db, 'products', id))
-    toast.success('Deleted')
-    setProducts(ps => ps.filter(p => p.id !== id))
+    try {
+      await deleteDoc(doc(db, 'products', id))
+      logAction('product.deleted', { productId: id })
+      toast.success('Deleted')
+      setProducts(ps => ps.filter(p => p.id !== id))
+    } catch (e) {
+      logError(e, 'product.delete_failed', { productId: id })
+      throw e
+    }
   }
 
   const cats     = Array.from(new Set(products.map(p => p.category))).filter(Boolean)

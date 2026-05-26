@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useCallback, useState } f
 import { User, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
+import { logAction, logError } from '@/lib/audit'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const logout = useCallback(async () => {
+    logAction('admin.logout')
     clearTimers()
     await signOut(auth)
     router.push('/login')
@@ -74,6 +76,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, resetIdleTimer, clearTimers])
 
   useEffect(() => {
+    const onError = (event: ErrorEvent) => {
+      logError(event.error ?? event.message, 'window.onerror', { message: event.message })
+    }
+    const onUnhandled = (event: PromiseRejectionEvent) => {
+      logError(event.reason, 'unhandled_rejection')
+    }
+    window.addEventListener('error', onError)
+    window.addEventListener('unhandledrejection', onUnhandled)
+    return () => {
+      window.removeEventListener('error', onError)
+      window.removeEventListener('unhandledrejection', onUnhandled)
+    }
+  }, [])
+
+  useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const tokenResult = await firebaseUser.getIdTokenResult()
@@ -103,19 +120,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    const cred = await signInWithEmailAndPassword(auth, email, password)
-    const tokenResult = await cred.user.getIdTokenResult()
-    const isAdminUser = tokenResult.claims.admin === true
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password)
+      const tokenResult = await cred.user.getIdTokenResult()
+      const isAdminUser = tokenResult.claims.admin === true
 
-    if (!isAdminUser) {
-      const userDoc = await getDoc(doc(db, 'users', cred.user.uid))
-      if (!userDoc.data()?.isAdmin) {
-        await signOut(auth)
-        throw new Error('Access denied. Admin accounts only.')
+      if (!isAdminUser) {
+        const userDoc = await getDoc(doc(db, 'users', cred.user.uid))
+        if (!userDoc.data()?.isAdmin) {
+          await signOut(auth)
+          logError(new Error('Access denied'), 'admin.login_denied', { email })
+          throw new Error('Access denied. Admin accounts only.')
+        }
       }
-    }
 
-    router.push('/dashboard')
+      logAction('admin.login', { email })
+      router.push('/dashboard')
+    } catch (e) {
+      if (!(e instanceof Error && e.message === 'Access denied. Admin accounts only.')) {
+        logError(e, 'admin.login_failed', { email })
+      }
+      throw e
+    }
   }
 
   return (

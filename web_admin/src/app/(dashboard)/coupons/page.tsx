@@ -17,6 +17,7 @@ import {
   PlusIcon, PencilIcon, TrashIcon, XMarkIcon, TicketIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
+import { logAction, logError } from '@/lib/audit'
 
 const EMPTY: Omit<Coupon, 'id' | 'usedCount'> = {
   code: '', type: 'percentage', value: 10,
@@ -56,13 +57,18 @@ export default function CouponsPage() {
     try {
       if (editId) {
         await updateDoc(doc(db, 'coupons', editId), data)
+        logAction('coupon.updated', { couponId: editId, code: data.code })
         toast.success('Coupon updated')
       } else {
-        await addDoc(collection(db, 'coupons'), { ...data, usedCount: 0, createdAt: serverTimestamp() })
+        const ref = await addDoc(collection(db, 'coupons'), { ...data, usedCount: 0, createdAt: serverTimestamp() })
+        logAction('coupon.created', { couponId: ref.id, code: data.code })
         toast.success('Coupon created')
       }
       closeModal()
       loadCoupons()
+    } catch (e) {
+      logError(e, editId ? 'coupon.update_failed' : 'coupon.create_failed', { code: data.code })
+      throw e
     } finally { setSaving(false) }
   }
 
@@ -74,6 +80,7 @@ export default function CouponsPage() {
   async function deleteCoupon(id: string) {
     if (!confirm('Delete this coupon?')) return
     await deleteDoc(doc(db, 'coupons', id))
+    logAction('coupon.deleted', { couponId: id })
     setCoupons(cs => cs.filter(c => c.id !== id))
     toast.success('Deleted')
   }

@@ -15,6 +15,7 @@ import {
   Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell,
 } from '@tremor/react'
 import { MagnifyingGlassIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { logAction, logError } from '@/lib/audit'
 
 const TREMOR_STATUS: Record<string, Color> = {
   new: 'blue', pending_payment: 'yellow', reviewed: 'emerald',
@@ -38,9 +39,15 @@ export default function OrdersPage() {
   }
 
   async function updateStatus(orderId: string, status: string) {
-    await updateDoc(doc(db, 'orders', orderId), { status, updatedAt: new Date() })
-    toast.success('Status updated')
-    setOrders(os => os.map(o => o.id === orderId ? { ...o, status } : o))
+    try {
+      await updateDoc(doc(db, 'orders', orderId), { status, updatedAt: new Date() })
+      logAction('order.status_updated', { orderId, status })
+      toast.success('Status updated')
+      setOrders(os => os.map(o => o.id === orderId ? { ...o, status } : o))
+    } catch (e) {
+      logError(e, 'order.status_update_failed', { orderId, status })
+      throw e
+    }
   }
 
   const tabs = [{ label: 'All', value: '' }, ...ORDER_STATUSES.map(s => ({ label: s.label, value: s.value }))]

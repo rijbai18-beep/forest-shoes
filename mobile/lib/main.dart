@@ -13,6 +13,7 @@ import 'providers/branding_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/product_provider.dart';
 import 'services/notification_service.dart';
+import 'services/audit_service.dart';
 
 import 'firebase_options.dart';
 
@@ -24,6 +25,20 @@ void main() async {
   );
 
   await NotificationService.initialize();
+
+  // Capture Flutter framework errors
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    AuditService.instance.logError(
+      details.exception, details.stack, context: 'flutter_framework',
+    );
+  };
+
+  // Capture uncaught async/platform errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AuditService.instance.logError(error, stack, context: 'platform_error');
+    return true;
+  };
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

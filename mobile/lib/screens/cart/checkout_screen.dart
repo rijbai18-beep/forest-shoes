@@ -8,6 +8,7 @@ import '../../models/banner_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../services/order_service.dart';
+import '../../services/audit_service.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 
@@ -126,6 +127,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         couponCode: cart.appliedCouponCode,
       );
 
+      AuditService.instance.logAction('order.placed', details: {
+        'orderId': orderId,
+        'total': cart.calculateTotal(deliveryFee),
+        'itemCount': cart.items.length,
+        'paymentType': _selectedPayment!.name,
+      });
+
       if (_saveAddress && auth.user!.addresses.isEmpty) {
         await auth.updateAddresses([address]);
       }
@@ -134,7 +142,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (!mounted) return;
       _showOrderSuccess(orderId);
-    } catch (e) {
+    } catch (e, st) {
+      AuditService.instance.logError(e, st, context: 'order.place_failed');
       if (!mounted) return;
       // Stock-validation exceptions carry user-readable messages; strip the
       // Dart "Exception: " prefix before showing them. All other failures get

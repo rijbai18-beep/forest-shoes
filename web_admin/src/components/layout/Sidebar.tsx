@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, Package, Tag, ShoppingBag, Ticket, ImageIcon,
   CreditCard, Truck, Bell, BarChart3, Users, HeadphonesIcon,
-  FileText, LogOut, ChevronLeft, Settings,
+  FileText, LogOut, ChevronLeft, Settings, ScrollText,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -42,6 +42,7 @@ const GROUPS = [
       { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Support',       href: '/support',       icon: HeadphonesIcon },
       { name: 'Content',       href: '/content',       icon: FileText },
+      { name: 'Audit Logs',    href: '/audit-logs',    icon: ScrollText },
     ],
   },
   {

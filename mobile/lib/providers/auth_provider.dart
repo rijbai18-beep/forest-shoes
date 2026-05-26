@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 import '../models/order_model.dart';
 import '../services/auth_service.dart';
+import '../services/audit_service.dart';
 import '../services/notification_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -52,9 +53,11 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     try {
       await _authService.signIn(email, password);
+      AuditService.instance.logAction('user.login', details: {'email': email});
       return true;
     } on FirebaseAuthException catch (e) {
       _errorMessage = _mapAuthError(e.code);
+      AuditService.instance.logError(e, null, context: 'user.login_failed', details: {'email': email});
       return false;
     } catch (e) {
       _errorMessage = e.toString();
@@ -93,6 +96,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> signOut() async {
     if (_user != null) {
+      AuditService.instance.logAction('user.logout', details: {'email': _user!.email});
       final token = await NotificationService.getToken();
       if (token != null) {
         await _authService.removeFcmToken(_user!.uid, token);

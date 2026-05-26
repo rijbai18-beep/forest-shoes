@@ -26,6 +26,7 @@ class AppConstants {
   static const String colContent = 'content';
   static const String colReviews = 'reviews';
   static const String colStockAlerts = 'stockAlerts';
+  static const String colAuditLogs = 'audit_logs';
 
   // Subcollections
   static const String subWishlist = 'wishlist';
