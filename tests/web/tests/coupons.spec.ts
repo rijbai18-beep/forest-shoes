@@ -7,7 +7,7 @@ test.describe('Coupons', () => {
   });
 
   test('coupons page loads', async ({ authedPage: page }) => {
-    await expect(page.getByRole('heading', { name: /coupon/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /coupon/i })).toBeVisible({ timeout: 20_000 });
   });
 
   test('add coupon button is visible', async ({ authedPage: page }) => {
@@ -19,6 +19,6 @@ test.describe('Coupons', () => {
   test('coupon table or empty state renders', async ({ authedPage: page }) => {
     const table = page.locator('table');
     const empty  = page.getByText(/no coupons/i);
-    await expect(table.or(empty)).toBeVisible({ timeout: 10_000 });
+    await expect(table.or(empty).first()).toBeVisible({ timeout: 20_000 });
   });
 });

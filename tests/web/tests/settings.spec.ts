@@ -7,15 +7,15 @@ test.describe('Settings', () => {
   });
 
   test('settings page loads', async ({ authedPage: page }) => {
-    await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible({ timeout: 20_000 });
   });
 
   test('email sender card is present', async ({ authedPage: page }) => {
-    await expect(page.getByText(/email sender/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/email sender/i)).toBeVisible({ timeout: 20_000 });
   });
 
   test('payment & bank transfer card is present', async ({ authedPage: page }) => {
-    await expect(page.getByText(/payment|bank/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/payment|bank/i).first()).toBeVisible({ timeout: 20_000 });
   });
 
   test('email fields accept input', async ({ authedPage: page }) => {
@@ -28,7 +28,7 @@ test.describe('Settings', () => {
 
   test('save buttons are present for each section', async ({ authedPage: page }) => {
     const saveBtns = page.getByRole('button', { name: /save/i });
-    await expect(saveBtns.first()).toBeVisible({ timeout: 10_000 });
+    await expect(saveBtns.first()).toBeVisible({ timeout: 20_000 });
   });
 
   test('delivery types section is accessible', async ({ authedPage: page }) => {

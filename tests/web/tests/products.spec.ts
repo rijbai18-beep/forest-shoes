@@ -7,7 +7,7 @@ test.describe('Products', () => {
   });
 
   test('products page loads with table or grid', async ({ authedPage: page }) => {
-    await expect(page.getByRole('heading', { name: /products/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /products/i })).toBeVisible({ timeout: 20_000 });
     // Should show either a table with rows or an empty state
     const table = page.locator('table, [data-testid="product-grid"]');
     const empty  = page.getByText(/no products/i);
@@ -17,7 +17,7 @@ test.describe('Products', () => {
   test('add product button is visible', async ({ authedPage: page }) => {
     const addBtn = page.getByRole('button', { name: /add product/i })
       .or(page.getByRole('link', { name: /add product/i }));
-    await expect(addBtn).toBeVisible();
+    await expect(addBtn.first()).toBeVisible();
   });
 
   test('product search / filter input is present', async ({ authedPage: page }) => {

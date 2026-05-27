@@ -1,7 +1,11 @@
 import { test, expect, loginAdmin } from './fixtures';
 
+// Tests that need an unauthenticated browser must clear the saved session
+const unauthUse = { storageState: { cookies: [], origins: [] } };
+
 test.describe('Auth', () => {
   test('unauthenticated redirect to login', async ({ page }) => {
+    // fresh page context has no auth state — goes straight to /dashboard to trigger redirect
     await page.goto('/dashboard');
     await page.waitForURL('**/login**', { timeout: 10_000 });
     await expect(page.locator('input[type="email"], input[placeholder*="admin"]')).toBeVisible();

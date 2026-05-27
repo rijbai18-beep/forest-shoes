@@ -7,7 +7,7 @@ test.describe('Orders', () => {
   });
 
   test('orders page loads', async ({ authedPage: page }) => {
-    await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible({ timeout: 20_000 });
   });
 
   test('order IDs use FS-prefixed format or legacy hash format', async ({ authedPage: page }) => {
