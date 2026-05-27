@@ -1,0 +1,14 @@
+# Credentials — never commit
+.env.test
+
+# Playwright generated output
+web/node_modules/
+web/test-results/
+web/playwright-report/
+web/dist/
+
+# Generated reports
+reports/
+
+# Flutter test results
+mobile/
