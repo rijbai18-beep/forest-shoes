@@ -160,5 +160,12 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow update, delete: if false;
     }
+
+    // Order number counter — active users can read/update, never delete
+    match /counters/{counterId} {
+      allow read, update: if isActiveUser();
+      allow create: if isActiveUser();
+      allow delete: if false;
+    }
   }
 }
