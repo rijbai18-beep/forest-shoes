@@ -110,7 +110,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         postcode: _postcodeCtrl.text,
       );
 
-      final orderId = await _orderService.placeOrder(
+      final (orderId, orderNumber) = await _orderService.placeOrder(
         userId: auth.user!.uid,
         items: cart.items.toList(),
         subtotal: cart.subtotal,
@@ -129,6 +129,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       AuditService.instance.logAction('order.placed', details: {
         'orderId': orderId,
+        'orderNumber': orderNumber,
         'total': cart.calculateTotal(deliveryFee),
         'itemCount': cart.items.length,
         'paymentType': _selectedPayment!.name,
@@ -141,7 +142,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       cart.clearCart();
 
       if (!mounted) return;
-      _showOrderSuccess(orderId);
+      _showOrderSuccess(orderId, orderNumber);
     } catch (e, st) {
       AuditService.instance.logError(e, st, context: 'order.place_failed');
       if (!mounted) return;
@@ -158,7 +159,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  void _showOrderSuccess(String orderId) {
+  void _showOrderSuccess(String orderId, String orderNumber) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -175,7 +176,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(
-              'Order #${orderId.substring(0, 8).toUpperCase()} confirmed.\nA receipt has been sent to your email.',
+              'Order $orderNumber confirmed.\nA receipt has been sent to your email.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary),
             ),

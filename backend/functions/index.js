@@ -62,6 +62,7 @@ function fetchBuffer(url) {
 }
 
 function buildReceiptHtml(order, user, settings) {
+  const displayId = order.orderNumber ?? `#${order.id.slice(0, 8).toUpperCase()}`;
   const logoUrl = settings.logoUrl || null;
   const orderDate = order.createdAt
     ? new Date(order.createdAt._seconds * 1000).toLocaleDateString("en-MU", { day: "2-digit", month: "long", year: "numeric" })
@@ -90,7 +91,7 @@ function buildReceiptHtml(order, user, settings) {
 
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Order Receipt #${order.id}</title></head>
+<head><meta charset="UTF-8"><title>Order Receipt ${displayId}</title></head>
 <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0">
 <tr><td align="center">
@@ -107,7 +108,7 @@ function buildReceiptHtml(order, user, settings) {
   <tr><td style="padding:24px 32px 0">
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8faf8;border-radius:8px;padding:16px">
       <tr>
-        <td style="font-size:13px;color:#555"><strong style="color:#111">Order ID:</strong> #${order.id}</td>
+        <td style="font-size:13px;color:#555"><strong style="color:#111">Order ID:</strong> ${displayId}</td>
         <td style="font-size:13px;color:#555;text-align:right"><strong style="color:#111">Date:</strong> ${orderDate}</td>
       </tr>
       <tr>
@@ -145,9 +146,8 @@ function buildReceiptHtml(order, user, settings) {
     <div style="background:#fffbeb;border:1.5px solid #f59e0b;border-radius:8px;padding:14px 16px">
       <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#92400e">⚠️ Payment Reference Required</p>
       <p style="margin:0;font-size:13px;color:#92400e;line-height:1.5">
-        ${settings.bankPaymentNote || `Please use your Order ID <strong>#${order.id}</strong> as the reference / description when making your bank transfer.`}
-        ${settings.bankPaymentNote ? "" : ""}
-        <br><strong>Order ID: #${order.id}</strong>
+        ${settings.bankPaymentNote || `Please use your Order ID <strong>${displayId}</strong> as the reference / description when making your bank transfer.`}
+        <br><strong>Order ID: ${displayId}</strong>
       </p>
     </div>
   </td></tr>
@@ -182,6 +182,7 @@ function buildReceiptHtml(order, user, settings) {
 }
 
 function buildReceiptPdf(order, user, settings, logoBuffer) {
+  const displayId = order.orderNumber ?? `#${order.id.slice(0, 8).toUpperCase()}`;
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50, size: "A4" });
     const chunks = [];
@@ -213,7 +214,7 @@ function buildReceiptPdf(order, user, settings, logoBuffer) {
     doc.rect(50, doc.y, pageW, 70).fill(LIGHT);
     const infoY = doc.y + 12;
     doc.font("Helvetica").fontSize(10).fillColor(GRAY);
-    doc.text(`Order ID:`, 62, infoY); doc.font("Helvetica-Bold").fillColor("#111").text(`#${order.id}`, 130, infoY);
+    doc.text(`Order ID:`, 62, infoY); doc.font("Helvetica-Bold").fillColor("#111").text(displayId, 130, infoY);
     doc.font("Helvetica").fillColor(GRAY).text(`Date:`, 62, infoY + 18); doc.font("Helvetica-Bold").fillColor("#111").text(orderDate, 130, infoY + 18);
     doc.font("Helvetica").fillColor(GRAY).text(`Customer:`, 62, infoY + 36); doc.font("Helvetica-Bold").fillColor("#111").text(user.name || user.email || "—", 130, infoY + 36);
     doc.font("Helvetica").fillColor(GRAY).text(`Status:`, 350, infoY); doc.font("Helvetica-Bold").fillColor(GREEN).text(order.status || "Confirmed", 400, infoY);
@@ -273,13 +274,13 @@ function buildReceiptPdf(order, user, settings, logoBuffer) {
     doc.y = ty + 32;
 
     // ── Payment reference box ─────────────────────────────────────────────────
-    const refNote = settings.bankPaymentNote || `Please use your Order ID #${order.id} as the payment reference.`;
+    const refNote = settings.bankPaymentNote || `Please use your Order ID ${displayId} as the payment reference.`;
     const boxH = 54;
     doc.rect(50, doc.y, pageW, boxH).fill("#FFFBEB").stroke("#F59E0B");
     doc.font("Helvetica-Bold").fontSize(10).fillColor("#92400E")
       .text("Payment Reference Required", 62, doc.y + 10);
     doc.font("Helvetica").fontSize(9).fillColor("#92400E")
-      .text(`${refNote}  Order ID: #${order.id}`, 62, doc.y + 24, { width: pageW - 24 });
+      .text(`${refNote}  Order ID: ${displayId}`, 62, doc.y + 24, { width: pageW - 24 });
     doc.y += boxH + 16;
 
     // ── Bank details ─────────────────────────────────────────────────────────
@@ -322,6 +323,7 @@ exports.onOrderCreated = functions.firestore
   .document("orders/{orderId}")
   .onCreate(async (snap, context) => {
     const order = { id: context.params.orderId, ...snap.data() };
+    const displayId = order.orderNumber ?? `#${order.id.slice(0, 8).toUpperCase()}`;
     const userSnap = await db.collection("users").doc(order.userId).get();
     if (!userSnap.exists) return;
     const user = userSnap.data();
@@ -344,15 +346,15 @@ exports.onOrderCreated = functions.firestore
         await getTransporter(settings).sendMail({
           from: `"Forest Shoes" <${settings.emailUser}>`,
           to: user.email,
-          subject: `Your Forest Shoes Order #${order.id} is Confirmed`,
+          subject: `Your Forest Shoes Order ${displayId} is Confirmed`,
           html: htmlBody,
           attachments: [{
-            filename: `receipt-${order.id}.pdf`,
+            filename: `receipt-${displayId}.pdf`,
             content: pdfBuffer,
             contentType: "application/pdf",
           }],
         });
-        functions.logger.info(`Receipt email sent to ${user.email} for order ${order.id}`);
+        functions.logger.info(`Receipt email sent to ${user.email} for order ${displayId}`);
       } catch (err) {
         functions.logger.error("Email send failed:", err.message, err.stack);
       }
@@ -361,7 +363,7 @@ exports.onOrderCreated = functions.firestore
     await db.collection("notifications").add({
       userId: order.userId,
       title: "Order Confirmed! 🎉",
-      body: `Your order #${order.id} has been placed successfully.`,
+      body: `Your order ${displayId} has been placed successfully.`,
       type: "order",
       data: { orderId: order.id },
       isRead: false,
@@ -371,7 +373,7 @@ exports.onOrderCreated = functions.firestore
     await sendPushToUser(
       order.userId,
       "Order Confirmed! 🎉",
-      `Your order #${order.id} has been placed. We'll notify you when it's dispatched.`,
+      `Your order ${displayId} has been placed. We'll notify you when it's dispatched.`,
       { type: "order", orderId: order.id }
     );
   });
@@ -385,6 +387,7 @@ exports.onOrderStatusChanged = functions.firestore
     if (before.status === after.status) return;
 
     const orderId = context.params.orderId;
+    const displayId = after.orderNumber ?? `#${orderId.slice(0, 8).toUpperCase()}`;
     const statusMessages = {
       reviewed: "Your payment has been reviewed.",
       processing: "Your order is being prepared.",
@@ -396,7 +399,7 @@ exports.onOrderStatusChanged = functions.firestore
 
     await db.collection("notifications").add({
       userId: after.userId,
-      title: `Order Update #${orderId}`,
+      title: `Order Update ${displayId}`,
       body: message,
       type: "order_update",
       data: { orderId },
@@ -404,7 +407,7 @@ exports.onOrderStatusChanged = functions.firestore
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    await sendPushToUser(after.userId, `Order Update #${orderId}`, message, {
+    await sendPushToUser(after.userId, `Order Update ${displayId}`, message, {
       type: "order_update", orderId,
     });
   });

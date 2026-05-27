@@ -60,7 +60,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           pw.SizedBox(height: 20),
           pw.Divider(),
           pw.SizedBox(height: 10),
-          pw.Text('Order: #${order.id.substring(0, 8).toUpperCase()}'),
+          pw.Text('Order: ${order.displayId}'),
           pw.Text('Date: ${DateFormat('dd MMM yyyy').format(order.createdAt)}'),
           pw.Text('Status: ${order.statusLabel}'),
           pw.SizedBox(height: 20),
@@ -130,7 +130,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('#${o.id.substring(0, 8).toUpperCase()}'),
+        title: Text(o.displayId),
         actions: [
           IconButton(
             icon: const Icon(Icons.download_rounded),

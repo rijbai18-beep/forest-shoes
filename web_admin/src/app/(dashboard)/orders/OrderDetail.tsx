@@ -45,7 +45,7 @@ export default function OrderDetailClient({ id }: { id: string }) {
         <ArrowLeft size={16} /> Back to Orders
       </button>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Order #{order.id.substring(0, 8).toUpperCase()}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Order {order.orderNumber ?? `#${order.id.substring(0, 8).toUpperCase()}`}</h1>
         <p className="text-sm text-gray-400 mt-1">{formatDateTime(order.createdAt)}</p>
       </div>
       <div>

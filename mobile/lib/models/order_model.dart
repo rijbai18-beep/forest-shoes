@@ -65,6 +65,7 @@ class OrderModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final Map<String, dynamic>? paymentProof;
+  final String? orderNumber;
 
   const OrderModel({
     required this.id,
@@ -88,7 +89,10 @@ class OrderModel {
     required this.createdAt,
     required this.updatedAt,
     this.paymentProof,
+    this.orderNumber,
   });
+
+  String get displayId => orderNumber ?? '#${id.substring(0, 8).toUpperCase()}';
 
   String get statusLabel {
     const labels = {
@@ -130,6 +134,7 @@ class OrderModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       paymentProof: data['paymentProof'],
+      orderNumber: data['orderNumber'],
     );
   }
 

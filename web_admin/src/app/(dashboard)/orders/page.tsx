@@ -112,7 +112,7 @@ export default function OrdersPage() {
                         const badge = getStatusBadge(order.status, ORDER_STATUSES)
                         return (
                           <TableRow key={order.id} className="hover:bg-gray-50 group">
-                            <TableCell className="font-mono font-bold text-brand-600 text-xs">#{order.id.slice(0,8).toUpperCase()}</TableCell>
+                            <TableCell className="font-mono font-bold text-brand-600 text-xs">{order.orderNumber ?? `#${order.id.slice(0,8).toUpperCase()}`}</TableCell>
                             <TableCell>
                               <div className="font-semibold text-gray-900">{order.address?.name ?? '—'}</div>
                               <div className="text-xs text-gray-400">{order.address?.phone}</div>

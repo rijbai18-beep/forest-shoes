@@ -41,6 +41,7 @@ export interface CustomField {
 
 export interface Order {
   id: string
+  orderNumber?: string
   userId: string
   userEmail?: string
   userName?: string

@@ -7,7 +7,7 @@ import '../models/banner_model.dart';
 class OrderService {
   final _db = FirebaseFirestore.instance;
 
-  Future<String> placeOrder({
+  Future<(String, String)> placeOrder({
     required String userId,
     required List<CartItemModel> items,
     required double subtotal,
@@ -39,8 +39,12 @@ class OrderService {
         .map((id) => _db.collection(AppConstants.colProducts).doc(id))
         .toList();
 
+    final counterRef = _db.collection('counters').doc('orders');
+    String generatedOrderNumber = '';
+
     await _db.runTransaction((tx) async {
       // ── Phase 1: reads (must all come before any writes) ────────────────
+      final counterSnap = await tx.get(counterRef);
       final snaps = await Future.wait(productRefs.map((ref) => tx.get(ref)));
 
       // ── Phase 2: stock validation ────────────────────────────────────────
@@ -61,9 +65,14 @@ class OrderService {
       }
 
       // ── Phase 3: create order ────────────────────────────────────────────
+      final count = ((counterSnap.data()?['count'] as int?) ?? 0) + 1;
+      generatedOrderNumber = 'FS${count.toString().padLeft(4, '0')}';
+      tx.set(counterRef, {'count': count}, SetOptions(merge: true));
+
       final now = FieldValue.serverTimestamp();
       tx.set(orderRef, {
         'userId': userId,
+        'orderNumber': generatedOrderNumber,
         'items': items.map((e) => e.toMap()).toList(),
         'subtotal': subtotal,
         'deliveryFee': deliveryFee,
@@ -91,7 +100,7 @@ class OrderService {
       }
     });
 
-    return orderRef.id;
+    return (orderRef.id, generatedOrderNumber);
   }
 
   Future<List<OrderModel>> getUserOrders(String userId) async {

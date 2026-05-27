@@ -129,7 +129,7 @@ class _OrderCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '#${order.id.substring(0, 8).toUpperCase()}',
+                          order.displayId,
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
