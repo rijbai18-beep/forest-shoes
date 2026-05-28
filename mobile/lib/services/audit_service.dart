@@ -23,7 +23,7 @@ class AuditService {
       'errorMessage': null,
       'stackTrace': null,
       'timestamp': FieldValue.serverTimestamp(),
-    }).catchError((_) {});
+    }).then<void>((_) {}).catchError((_) {});
   }
 
   void logError(Object error, StackTrace? stackTrace, {String context = 'uncaught_error', Map<String, dynamic>? details}) {
@@ -38,6 +38,6 @@ class AuditService {
       'errorMessage': error.toString(),
       'stackTrace': stackTrace?.toString(),
       'timestamp': FieldValue.serverTimestamp(),
-    }).catchError((_) {});
+    }).then<void>((_) {}).catchError((_) {});
   }
 }

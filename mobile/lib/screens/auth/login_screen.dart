@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../config/test_keys.dart';
 import '../../widgets/common/app_logo_widget.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
@@ -89,7 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 40),
                 CustomTextField(
-                  key: const ValueKey(TestKeys.emailField),
                   controller: _emailCtrl,
                   label: 'Email',
                   hint: 'your@email.com',
@@ -106,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
-                  key: const ValueKey(TestKeys.passwordField),
                   controller: _passCtrl,
                   label: 'Password',
                   hint: '••••••••',
@@ -137,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  key: const ValueKey(TestKeys.signInButton),
                   text: 'Sign In',
                   onPressed: _login,
                   isLoading: auth.isLoading,

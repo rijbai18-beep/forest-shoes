@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../config/test_keys.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
 import '../../providers/auth_provider.dart';
@@ -254,7 +253,6 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 ] else
                   _CheckoutButton(
-                    key: const ValueKey(TestKeys.checkoutButton),
                     label: 'Proceed to Checkout',
                     onPressed: () => context.push('/checkout'),
                   ),

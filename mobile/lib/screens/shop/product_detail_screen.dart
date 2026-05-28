@@ -9,7 +9,6 @@ import '../../config/theme.dart';
 import '../../models/product_model.dart';
 import '../../models/cart_item_model.dart';
 import '../../providers/auth_provider.dart';
-import '../../config/test_keys.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../services/product_service.dart';
@@ -723,7 +722,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     // Add to cart
                     Expanded(
                       child: ElevatedButton(
-                        key: const ValueKey(TestKeys.addToCartButton),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,

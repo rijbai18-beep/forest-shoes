@@ -34,17 +34,21 @@ class AuthProvider extends ChangeNotifier {
           _user = user;
           notifyListeners();
         });
-
-        final token = await NotificationService.getToken();
-        if (token != null) {
-          await _authService.updateFcmToken(firebaseUser.uid, token);
-        }
       } else {
         _userSub?.cancel();
         _user = null;
       }
+      // Mark initialized immediately — don't block on async FCM operations.
       _isInitialized = true;
       notifyListeners();
+
+      // Fire-and-forget: upload FCM token after app is already usable.
+      if (firebaseUser != null) {
+        final token = await NotificationService.getToken();
+        if (token != null) {
+          await _authService.updateFcmToken(firebaseUser.uid, token);
+        }
+      }
     });
   }
 

@@ -123,6 +123,7 @@ class _NavTab extends StatelessWidget {
   final String? badge;
 
   const _NavTab({
+    super.key,
     required this.icon,
     required this.activeIcon,
     required this.label,
